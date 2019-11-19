@@ -129,13 +129,11 @@ html, body {
 .form-group input {
     margin-top: 4px;
     margin-bottom: 4px;
-    box-shadow: 1px 1px 1px var(--nav-color);
 }
 
 .form-group select {
     margin-top: 4px;
     margin-bottom: 4px;
-    box-shadow: 1px 1px var(--nav-color);
 }
 
 #saveButton {
