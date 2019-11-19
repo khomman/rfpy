@@ -1,6 +1,7 @@
 from datetime import datetime
 from rfpy import db
 
+
 class Stations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     station = db.Column(db.String(10), index=True, unique=True)
@@ -11,27 +12,29 @@ class Stations(db.Model):
 
     # Set the relationship to the rftn table with a backref.  That way we can
     # get the station details from the receiver functions table
-    receiver_functions = db.relationship('ReceiverFunctions', 
-                                        backref='station_receiver_functions',
-                                        lazy='dynamic')
+    receiver_functions = db.relationship('ReceiverFunctions',
+                                         backref='station_receiver_functions',
+                                         lazy='dynamic')
     hks = db.relationship('HKResults', backref='hk_station', lazy='dynamic')
 
     def __repr__(self):
         return f'<Station: {self.id}, {self.station}, {self.latitude}, '\
                 f'{self.longitude}, {self.elevation}, {self.status}>'
 
+
 class Filters(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filter = db.Column(db.Float)
 
     receiver_functions = db.relationship('ReceiverFunctions',
-                                        backref='filter_receiver_functions',
-                                        lazy='dynamic')
+                                         backref='filter_receiver_functions',
+                                         lazy='dynamic')
     hkresult = db.relationship('HKResults', backref='hk_receiver_functions',
-                                lazy='dynamic')
+                               lazy='dynamic')
 
     def __repr__(self):
         return f'<Filter Center: {self.id}, {self.filter}'
+
 
 class HKResults(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,6 +50,7 @@ class HKResults(db.Model):
 
     def __repr__(self):
         return f'<Station: {self.station}, H: {self.h}, K: {self.k}>'
+
 
 class ReceiverFunctions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
