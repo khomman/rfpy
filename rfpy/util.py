@@ -1,12 +1,8 @@
-import os
-import time
-import glob
-
-import matplotlib.pyplot as plt
 from obspy import read, Stream
-#from rfpy import app, db
-#from rfpy.models import Stations, Data, Filters, HKResults
-#from config import DATA_ARCHIVE_STRUCTURE
+# from rfpy import app, db
+# from rfpy.models import Stations, Data, Filters, HKResults
+# from config import DATA_ARCHIVE_STRUCTURE
+
 
 def read_station_file(stafile):
     '''
@@ -23,13 +19,14 @@ def read_station_file(stafile):
                                            [TA_M54A, 40.234, -78.092, 353.5]]
     :rtype: List
     '''
-    
+
     stas = []
     with open(stafile, 'r') as f:
         for line in f.readlines():
             sta, lat, lon, ele = line.split()
-            stas.append([sta,lat,lon,ele])
+            stas.append([sta, lat, lon, ele])
     return stas
+
 
 def read_rftn_file(rftn_file):
     data_paths = {}
@@ -42,10 +39,11 @@ def read_rftn_file(rftn_file):
                 data_paths[station] = {}
             if filter not in data_paths[station]:
                 data_paths[station][filter] = []
-                
+
             data_paths[station][filter].append(path)
-    
+
     return data_paths
+
 
 def rftn_stream(rftn_list):
     st = Stream()
@@ -53,5 +51,3 @@ def rftn_stream(rftn_list):
         st += read(rftn)
         st[i].stats['name'] = rftn
     return st
-
-
