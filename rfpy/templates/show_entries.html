@@ -1,0 +1,27 @@
+{% extends "view.html" %}
+{% block content %}
+	<table class=entries>
+		<th>Station</th>
+		<th>Network</th>
+		<th>Gaussian</th>
+		<th>QC'd</th>
+		<th>HK done</th>
+		<th>HK</th>
+		{% for entry in entries %}
+			{% if entry.qc == 0 and entry.hk == 0 %}
+				<tr class=notDone>
+			{% elif entry.qc == 1 and entry.hk == 1 %}
+				<tr class=Done>
+			{% else %}
+				<tr class=halfDone>
+			{% endif %}
+				<td>{{ entry.station }}</td>
+				<td>{{ entry.network }}</td>
+				<td>{{ entry.gaussian }}</td>
+				<td>{{ entry.qc }}</td>
+				<td>{{ entry.hk }}</td>
+				<td><a href="{{entry.hkpath}}">HKLink</a></td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

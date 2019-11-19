@@ -1,0 +1,190 @@
+{% extends "view.html" %}
+	{% block content %}
+	{% if newform == 1 %}
+		<form method=post action="" id=hkform>
+			<div class="form-container">
+				<div class="form-group selects">
+					<label for="staselect">Station</label>
+					<select name=staselect id=staselect>
+						<option>Select a station</option>
+							{% for sta in stas %}
+								<option value="{{ sta.station }}">{{ sta.station}}</option>
+							{% endfor %}
+					</select>
+					<label for="filtselect">Filter</label>
+					<select name=filtselect id=filtselect>
+						<option>Select a filter</option>
+							{% for filt in filters %}
+								<option value="{{ filt.filter }}">{{ filt.filter }}</option>
+							{% endfor %}
+					</select>
+					<label for="vp">Vp</label>
+					<input type="number" name="vp" maxlength="3" size="3" value="5.2" step="0.1"/>
+				</div>
+				<div class="form-group weights">
+					<label for="w1">Ps Weight</label>
+					<input type="number" name="w1" maxlength="3" size="3" value="0.7" step="0.1"/>
+					<label for="w2">PpPs Weight</label>
+					<input type="number" name="w2" maxlength="3" size="3" value="0.2" step="0.1"/>
+					<label for="w3">PpSs Weight</label>
+					<input type="number" name="w3" maxlength="3" size="3" value="0.1" step="0.1"/>
+				</div>
+				<div class="form-group depths">
+					<label for="startDepth">Start Depth</label>
+					<input type="number" name="startDepth" maxlength="4" size="4" value="4.0" step="0.1"/>
+					<label for="endDepth">End Depth</label>
+					<input type="number" name="endDepth" maxlength="4" size="4" value="10.0" step="0.1"/>
+					<label for="pws">Phase Weight Stacking</label>
+					<input type="checkbox" name="pws" value="yes">
+				</div>
+				<div class="form-group kappas">
+					<label for="startKappa">Start Kappa</label>
+					<input type="number" name="startKappa" maxlength="4" size="4" value="1.8" step="0.01"/>
+					<label for="endKappa">End Kappa</label>
+					<input type="number" name="endKappa" maxlength="4" size="4" value="2.2" step="0.01"/>
+					<label for="doboot">Bootstrapping</label>
+					<input type="checkbox" name="doboot" value="yes">
+				</div>
+				<div class="form-group times">
+					<label for="startTime">Plot Start Second</label>
+					<input type="number" name="startTime" maxlength="4" size="4" value="-2.0" min=-10.0/>
+					<label for="endTime">Plot End Seconds</label>
+					<input type="number" name="endTime" maxlength="4" size="4" value="10.0"/>
+					<input type="submit" value="Compute">
+				</div>
+			</div>
+		</form>
+		{% else %}
+		<form method=post action="" id="hkform">
+			<div class="form-container">
+				<div class="form-group selects">
+					<label for="staselect">Station</label>
+					<select name="staselect" id="staselect">
+						<option>Select a station</option>
+							{% for sta in stas %}
+								{% if sta.station==staval %}
+								<option value="{{ sta.station }}" selected>{{ sta.station }}</option>
+								{% else %}
+								<option value="{{ sta.station }}">{{ sta.station }}</option>
+								{% endif %}
+							{% endfor %}
+					</select>
+					<label for="filtselect">Filter</label>
+					<select name="filtselect" id="filtselect">
+						<option>Select a filter</option>
+							{% for filt in filters %}
+								{% if filt.filter|string==filtval %}
+								<option value="{{ filt.filter }}" selected>{{ filt.filter }}</option>
+								{% else %}
+								<option value="{{ filt.filter }}">{{ filt.filter }}</option>
+								{% endif %}
+							{% endfor %}
+					</select>
+					<label for="vp">Vp</label>
+					<input type="number" name="vp" maxlength="3" size="3" value="{{vp}}" step="0.1"/>
+				</div>
+				<div class="form-group weights">
+					<label for="w1">Ps Weight</label>
+					<input type="number" name="w1" maxlength="3" size="3" value="{{w1}}" step="0.1"/>
+					<label for="w2">PpPs Weight</label>
+					<input type="number" name="w2" maxlength="3" size="3" value="{{w2}}" step="0.1"/>
+					<label for="w3">PpSs Weight</label>
+					<input type="number" name="w3" maxlength="3" size="3" value="{{w3}}" step="0.1"/>
+				</div>	
+				<div class="form-group depths">
+					<label for="startDepth">Start Depth</label>
+					<input type="number" name="startDepth" maxlength="4" size="4" value="{{startd}}" step="0.1"/>
+					<label for="endDepth">End Depth</label>
+					<input type="number" name="endDepth" maxlength="4" size="4" value="{{endd}}" step="0.1"/>
+					<label for="pws">Phase Weight Stacking</label>
+					{% if pws==true %}
+						<input type="checkbox" name="pws" value="yes" checked>
+					{% else %}
+						<input type="checkbox" name="pws" value="yes">
+					{% endif %}
+				</div>
+				<div class="form-group kappas">
+					<label for="startKappa">Start Kappa</label>
+					<input type="number" name="startKappa" maxlength="4" size="4" value="{{startk}}" step="0.1"/>
+					<label for="endKappa">End Kappa</label>
+					<input type="number" name="endKappa" maxlength="4" size="4" value="{{endk}}" step="0.1"/>
+					<label for="doboot">Bootstrapping</label>
+					{% if bs==true %}
+						<input type="checkbox" name="doboot" value="yes" checked>
+					{% else %}
+						<input type="checkbox" name="doboot" value="yes">
+					{% endif %}
+				</div>
+				<div class="form-group times">
+					<label for="startTime">Plot Start Second</label>
+					<input type="number" name="startTime" maxlength="4" size="4" value="{{starttime}}" min=-10.0 step="0.1"/>
+					<label for="endTime">Plot End Seconds</label>
+					<input type="number" name="endTime" maxlength="4" size="4" value="{{endtime}}" step="0.1"/>
+					<input type="submit" value="Compute">
+				</div>
+			</div>
+		</form>
+		{% endif %}
+		<div id="messages" class="messages hidden-message"></div>
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				<div class="flask-messages">
+					{% for message in messages %}
+						<h2>{{ message }}</h2>
+					{% endfor %}
+				</div>
+			{% endif %}
+		{% endwith %}
+		{% if result != None %}
+		<button id="saveButton">Save HK</button>
+			<div class="hkContainer">
+				<img src="{{ plot }}">
+			</div>
+
+			{% for item in hk %}
+				<p hidden class='hkVals'>{{ item }}</p>
+			{% endfor %}
+		{% endif %}
+
+		<script>
+		function saveHK(){
+			const headInfo = document.getElementsByClassName('hkContainer')[0].innerHTML;
+			const hkpath = headInfo.split("=")[1].replace(/[\t\n">]+/g,'');
+			const fname = hkpath.split('/')[1].replace(/[\t\n]/g,'');
+			const sta = `${fname.split('_')[0]}_${fname.split('_')[1]}`;
+			const filt = fname.split('_')[2];
+			const hkVals = document.getElementsByClassName('hkVals');
+			const maxh = hkVals[0].innerHTML.replace(/[\[\]]+/g,'');
+			const sigmah = hkVals[1].innerHTML.replace(/[\[\]]+/g,'');
+			const maxk = hkVals[2].innerHTML.replace(/[\[\]]+/g,'');
+			const sigmak = hkVals[3].innerHTML.replace(/[\[\]]+/g,'');
+			const vp = hkVals[4].innerHTML.replace(/[\[\]]+/g,'');
+			const payload = {
+				hkpath,
+				fname,
+				sta,
+				filt,
+				maxh,
+				sigmah,
+				maxk,
+				sigmak,
+				vp
+			};
+			//New xhr request to send this data to /savehk route
+			const messageDiv = document.getElementById("messages")
+			messageDiv.classList.add("message")
+			messageDiv.classList.remove("hidden-message")
+			messageDiv.innerHTML = "<p>Loading...</p>"
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '/savehk')
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.onload = function(){
+				messageDiv.innerHTML = "<p>Database Updated!</p>"
+
+			}
+			xhr.send(JSON.stringify(payload))
+		}
+		const saveButton = document.getElementById('saveButton');
+		saveButton.addEventListener('click', saveHK);
+		</script>
+	{% endblock %}

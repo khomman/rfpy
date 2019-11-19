@@ -1,0 +1,93 @@
+{% extends "view.html" %}
+	{% block content %}
+		<form id="qc-form" method=post action = "">
+			<select name=staselect id=staselect>
+				<option>Select a station</option>
+					{% for sta in stas %}
+						<option value="{{ sta.station }}">{{ sta.station}}</option>
+						{% endfor %}
+			</select>
+			<select name=filtselect>
+				<option>Select a filter</option>
+					{% for filt in filters %}
+						<option value=" {{ filt.filter }}"> {{ filt.filter }}</option>
+					{% endfor %}
+				</select>
+			<select name="selectAll">
+				<option value="yes">All Data</option>
+				<option value="no">Approved Data</option>
+				<option value="new">New Data</option>
+			</select>
+			Start time:
+			<input type="text" name="starttime" maxlength="4" size="4" value="-2">
+			End time:
+			<input type="text" name="endtime" maxlength="4" size="4" value="20">
+			<input type="submit" value="Plot">
+
+		</form>
+			<p><input type="submit" class="SaveButton" value="Save"></button></p>
+			<div id="messages" class="messages hidden-message"></div>
+			{% if result != None %}
+			{% for item in eqrresult %}
+				{% if item[1] == True %}
+					<div class="rftn-plots" id="{{ item[0] }}" data-dbid_rad="{{ item[2]}}" data-dbid_trans="{{ item[3] }}">
+						<img src="{{ item[0] }}" height=125px width=1200px>
+					</div>
+				{% else %}
+					<div class="rftn-plots notAccepted" id="{{ item[0] }}" data-dbid_rad="{{ item[2] }}" data-dbid_trans="{{ item[3] }}">
+						<img src="{{ item[0] }}" height=125px width=1200px>
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		<p>
+			<input type="submit" class="SaveButton" value="Save"></button>
+			<button id="toTop">Top</button>
+		</p>
+		<script>
+		
+		function toggleAccepted(e){
+			this.classList.toggle('notAccepted');
+		}
+
+		function sendStatusAndIDS(){
+			let status = [];
+			const tmp = document.querySelectorAll(".rftn-plots");
+			tmp.forEach(item => {
+				if (item.classList.contains("notAccepted")){
+					status.push([item.dataset.dbid_rad, item.dataset.dbid_trans, false, item.id])
+				} else {
+					status.push([item.dataset.dbid_rad, item.dataset.dbid_trans, true, item.id])
+				}
+			});
+			const messageDiv = document.getElementById("messages")
+			messageDiv.classList.add("message")
+			messageDiv.classList.remove("hidden-message")
+			messageDiv.innerHTML = "<p>Loading...</p>"
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '/doneqc')
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.onload = function(){
+				//alert('Database Updated')
+				messageDiv.innerHTML = "<p>Database Updated!</p>"
+
+			}
+			xhr.send(JSON.stringify(status))
+		}
+		
+		plots = document.querySelectorAll(".rftn-plots");
+		saveButton = document.querySelectorAll(".SaveButton");
+		topButton = document.getElementById("toTop");
+		
+		plots.forEach(plot => {
+			plot.addEventListener('click', toggleAccepted)
+		});
+		
+		saveButton.forEach(button => {
+			button.addEventListener('click', sendStatusAndIDS)
+		});
+
+		topButton.addEventListener('click', e => {
+			document.body.scrollTop = document.documentElement.scrollTop = 0});
+		</script>
+	{% endblock %}

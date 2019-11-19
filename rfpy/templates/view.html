@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<link rel="stylesheet" href={{ url_for('static', filename='main.css') }} type="text/css">
+		{% block head %}
+		{% endblock %}
+	</head>
+	<body>
+		<nav class="nav">
+			<a href="{{ url_for('index') }}">Home</a>
+			<a href="{{ url_for('qc') }}">QC Data</a>
+			<a href="{{ url_for('hkstack') }}">HK Stack</a>
+			<a href="{{ url_for('stations')}}">Stations</a>
+			<a href="{{ url_for('plots') }}">Plots</a>
+			<a id="dbadmin-dropdown" href="{{ url_for('dbAdmin') }}">DB Admin</a>
+		</nav>
+		{% block content %}
+		{% endblock %}
+	</body>
+</html>

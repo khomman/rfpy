@@ -1,0 +1,22 @@
+{% extends "view.html" %}
+{% block content %}
+    <div class="plot-container">
+        {% if format == "station" %}
+            <div class="plot-types">
+                <img src="{{ plot }}"/>
+            </div>
+        {% elif format == "hk" %}
+            <div class="plot-types">
+                {% for p in plot %}
+                    <img src="{{ plot }}"/>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="plot-types">
+                <img src="static/sta_thumb.png"/>
+                <img src="static/hk_thumb.png"/>
+                <img src="static/rayp_thumb.png"/>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

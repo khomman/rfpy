@@ -1,0 +1,24 @@
+{% extends "view.html" %}
+	{% block content %}
+		<form method=post action = "">
+			<table>
+				<tr>
+					{% for field in form %}
+					<td>{{ field.label }}:</td>
+					<td>{{ field(size=30) }}</td>
+					{% endfor %}
+				</tr>
+			</table>
+			<p>
+				<input type=submit value=Compute>
+			</p>
+		</form>
+		{% if result != None %}
+			{% for item in result %}
+			<div class="col-md-4" id="{{ item }}">
+				<img src="{{ item }}" height=120px width=400px>
+			</div>
+
+			{% endfor %}
+		{% endif %}
+	{% endblock %}

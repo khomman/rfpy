@@ -1,0 +1,3 @@
+graft rfpy/templates
+graft rfpy/static
+global-exclude *.pyc

@@ -1,0 +1,21 @@
+{% extends "view.html" %}
+{% block content %}
+<div class="station-table">
+	<table id="stations">
+		<th>Station</th>
+		<th>Latitude</th>
+		<th>Longitude</th>
+		<th>Elevation</th>
+		<th>Status</th>
+		{% for sta in stations %}
+			<tr>
+				<td>{{ sta.station }}</td>
+				<td>{{ sta.latitude }}</td>
+				<td>{{ sta.longitude }}</td>
+				<td>{{ sta.elevation }}</td>
+				<td>{{ sta.status }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+{% endblock %}

@@ -1,0 +1,228 @@
+:root {
+    --nav-color: #525252;
+    --nav-text: #f0f0f0;
+    --background-white: #f0f0f0;
+    --alert-red: #ff4136;
+    --green: #2ECC40;
+    --stations-table-even: #d3d0d0;
+}
+html, body {
+    box-sizing: border-box;
+    margin: 0;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    background-color: var(--background-white);
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: var(--nav-color);
+    width: 100%;
+    height: 3em;
+}
+
+.nav a {
+    display: flex;
+    align-items:center;
+    color: var(--nav-text);
+    height: 100%;
+    margin: 1em;
+    text-decoration: none;
+}
+
+.nav a:hover {
+    background-color: var(--nav-text);
+    color: var(--nav-color);
+    border-radius: 2px;
+    transition: all .15s ease-in-out 0s;
+}
+
+/* Index */
+.base-progress {
+    background-color: gray;
+    width: 100%;
+    height: 22px;
+    border-radius: 2px;
+}
+
+.progress {
+    background-color: green;
+    height: 18px;
+    padding:2px;
+    border-radius: 2px;
+    display: block;
+}
+
+/* QC */
+#qc-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#qc-form input {
+    margin: 10px;
+}
+
+#qc-form select {
+    margin: 10px;
+}
+.rftn-plots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.notAccepted {
+    opacity: 0.3;
+}
+
+/* HKStack */
+.hkContainer {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.hkContainer img {
+    box-shadow: 2px 2px 5px var(--nav-color);
+}
+
+.form-container {
+    display: grid;
+    grid-template-columns: 30px 1fr 1fr 1fr 1fr 1fr 30px;
+    border-bottom: 1px solid var(--nav-color);
+    box-shadow: 1px 1px var(--nav-color);
+}
+
+.selects {
+    grid-column-start: 2;
+    margin: auto;
+}
+.weights {
+    grid-column-start: 3;
+    margin: auto;
+}
+
+.depths {
+    grid-column-start: 4;
+    margin: auto;
+}
+
+.kappas {
+    grid-column-start: 5;
+    margin: auto;
+}
+
+.times {
+    grid-column-start: 6;
+    margin: auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+}
+
+.form-group input {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    box-shadow: 1px 1px 1px var(--nav-color);
+}
+
+.form-group select {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    box-shadow: 1px 1px var(--nav-color);
+}
+
+#saveButton {
+    background-color: var(--nav-color);
+    color: var(--nav-text);
+    border-radius: 6px;
+    margin-left: 60px;
+    margin-top: 20px;
+    width: 80px;
+    height: 40px;
+}
+
+#saveButton:hover {
+    background-color: var(--background-white);
+    color: var(--nav-color);
+    transition: all .1s ease-in-out;
+    transform: scale(1.1);
+    border: 2px solid var(--green)
+
+}
+/* Flash and Messages */
+.messages {
+    width: 100%;
+    height: 3em;
+    background-color: var(--nav-color);
+    color: var(--nav-text);
+}
+.message {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+.hidden-message {
+    display: none;
+}
+
+.flask-messages {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    background-color: var(--alert-red);
+}
+
+/* Stations */
+.station-table {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin-top: 2em;
+}
+#stations {
+    /*border: 1px solid var(--nav-color);
+    border-radius: 5px;*/
+    border-collapse: collapse;
+    width: 600px;
+    box-shadow: 1px 1px 2px var(--nav-color);
+
+}
+
+#stations td {
+    text-align: center;
+}
+#stations tr:nth-child(odd){
+    background-color: var(--background-white);
+}
+#stations tr:nth-child(even){
+    background-color: var(--stations-table-even);
+}
+
+/* Plot page */
+.plot-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.plot-types {
+    height: 100vh;
+    width: 95%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 1;
+    margin: 0;
+}
+
+.plot-types img {
+    margin: 5px;
+    box-shadow: 1px 1px 1px var(--nav-color);
+}

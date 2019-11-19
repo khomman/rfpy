@@ -1,0 +1,35 @@
+{% extends "view.html" %}
+{% block content %}
+<div class="progress-bars">
+    <div id="qc">
+        <div class="base-progress">
+            <div class="progress" style="width:{{ status.qcpercent }}%">
+                <span>Qualitycontrol:{{ status.qcpercent }}%</span>
+            </div>
+        </div>
+    </div>
+    <div id="hk">
+        <div class="base-progress">
+            <div class="progress" style="width:{{ status.hkpercent }}%">
+                <span>HKStacks:{{ status.hkpercent }}%</span>
+            </div>
+        </div>  
+    </div>
+</div>
+<div class="sta-table">
+    <table>
+        <thead>
+            <th>Station</th>
+            <th>Status</th>
+        </thead>
+        <tbody>
+            {% for sta in stations %}
+                <tr>
+                    <td>{{ sta.station }}</td>
+                    <td>{{ sta.status }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
