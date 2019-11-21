@@ -84,6 +84,7 @@ def _calulate_startend_sample(delta, starttime, plot_start, plot_end):
 
 def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
              label_position="left", ylabel="Back Azimuth"):
+    """ Plot receiver functions by back azimuth """
     for tr in st:
         baz = tr.stats.sac['baz']
         tr_start = tr.stats.sac['b']
@@ -114,7 +115,8 @@ def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
 
 def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left",
-              ylabel="Epicentral Distance ($^\circ$)"):
+              ylabel="Epicentral Distance ($^\circ$)"): # noqa
+    """ Plot Receiver functions by distance (gcarc) """
     for tr in st:
         dist = tr.stats.sac['gcarc']
         tr_start = tr.stats.sac['b']
@@ -144,6 +146,7 @@ def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
 
 def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left", ylabel="Ray Parameter"):
+    """ Plot receiver functions by ray parameter """
     for tr in st:
         rayp = tr.stats.sac['user8']
         tr_start = tr.stats.sac['b']
@@ -176,6 +179,7 @@ def base_map(projection='local', center_lat=0, center_lon=0, extent=None,
     '''
     Function to plot a basic map which can be used to add data later.
     '''
+    plt.figure()
     if projection == 'global':
         ax = plt.axes(projection=ccrs.Mollweide(central_longitude=center_lon))
     elif projection == 'local':
@@ -247,11 +251,13 @@ def station_map(sta_lats, sta_lons, sta_names=None, projection='local',
                    transform=data_crs)
     if sta_names:
         for i, name in enumerate(sta_names):
-            ax.text(sta_lons[i], sta_lats[i]+0.1, name,
+            # TODO; Fix to scale with map size
+            ax.text(sta_lons[i]-0.2, sta_lats[i]+0.1, name,
                     transform=data_crs)
 
     if filename:
         plt.savefig(filename)
+        plt.close()
         return
     return ax
 
@@ -267,20 +273,22 @@ def hk_map(sta_lats, sta_lons, hk_vals, sta_names=None, projection='local',
     if projection == 'global':
         ax = base_map(projection='global', center_lat=0,
                       center_lon=center_lon)
-        ax.scatter(sta_lons, sta_lats, c=hk_vals, marker='v', cmap='viridis',
-                   transform=data_crs)
+        im = ax.scatter(sta_lons, sta_lats, c=hk_vals, marker='v',
+                        cmap='viridis', transform=data_crs)
     elif projection == 'local':
         extent = _calculate_extent_with_cushion(sta_lats, sta_lons)
         ax = base_map(projection='local', center_lat=center_lat,
                       center_lon=center_lon, extent=extent)
-        ax.scatter(sta_lons, sta_lats, c=hk_vals, marker='v',
-                   cmap='viridis', transform=data_crs)
+        im = ax.scatter(sta_lons, sta_lats, c=hk_vals, marker='v',
+                        cmap='viridis', transform=data_crs)
     if sta_names:
         for i, name in enumerate(sta_names):
-            ax.text(sta_lons[i], sta_lats[i]+0.1, name,
+            # TODO; Fix to scale with map size
+            ax.text(sta_lons[i]-0.2, sta_lats[i]+0.1, name,
                     transform=data_crs)
-
+    plt.colorbar(im, ax=ax)
     if filename:
         plt.savefig(filename)
+        plt.close()
         return
     return ax
