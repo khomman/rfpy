@@ -8,7 +8,8 @@
         {% elif format == "hk" %}
             <div class="plot-types">
                 {% for p in plot %}
-                    <img src="{{ plot }}"/>
+                    <img src="{{ p[0] }}"/>
+                    <img src="{{ p[1] }}"/>
                 {% endfor %}
             </div>
         {% else %}
