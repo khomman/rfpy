@@ -218,9 +218,12 @@ html, body {
     justify-content: center;
     flex-shrink: 1;
     margin: 0;
+    border: 1px solid red;
 }
 
-.plot-types img {
+
+.plot-types a img {
     margin: 5px;
     box-shadow: 1px 1px 1px var(--nav-color);
+    width: 90%;
 }

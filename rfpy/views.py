@@ -6,7 +6,7 @@ from rfpy import app, db
 from .hkstack import HKStack
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions
 from rfpy.util import rftn_stream
-from rfpy.plotting import rftn_plot, station_map, hk_map
+from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -67,6 +67,7 @@ def qc():
                                 ReceiverFunctions.accepted == True) # noqa
             rfs = [[rftn.path, rftn.accepted, rftn.id] for rftn in rf_query]
 
+        # TODO Remove dependency on "eq?" in name..use tr.stats.channel instead
         eqt_rf = [rf[0] for rf in rfs if rf[0][-3:] == 'eqt']
         eqr_rf = [rf[0] for rf in rfs if rf[0][-3:] == 'eqr']
         accepted = {}
@@ -283,9 +284,35 @@ def hkmap():
                            format='hk')
 
 
-@app.route('/rfplots')
+@app.route('/rfplots', methods=['GET', 'POST'])
 def rfplots():
-    return render_template('rfplots.html')
+    stations = Stations.query.order_by(Stations.station).all()
+
+    if request.method == 'POST':
+        sta = request.form['staselect']
+        plot_start = request.form['startTime']
+        plot_end = request.form['endTime']
+
+        sta_id = Stations.query.filter_by(station=sta).first().id
+        filt_query = Filters.query.all()
+        plots = []
+        for filt in filt_query:
+            print(filt)
+            f = filt.id
+            rf_query = ReceiverFunctions.query.filter_by(station=sta_id) \
+                                              .filter_by(filter=f) \
+                                              .filter_by(accepted=True).all()
+            if not rf_query:
+                continue
+            rfs = [rf.path for rf in rf_query]
+            st = rftn_stream(rfs)
+            plot = f'static/{sta}_{filt.filter}_totalPlot.svg'
+            sta_total_rf_plot(st, plot_start=float(plot_start),
+                              plot_end=float(plot_end),
+                              filename=os.path.join(app.root_path, plot))
+            plots.append(plot)
+        return render_template('rfplots.html', plots=plots, stas=stations)
+    return render_template('rfplots.html', stas=stations)
 
 
 @app.route('/dbAdmin')

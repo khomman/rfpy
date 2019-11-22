@@ -5,6 +5,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import numpy as np
+from obspy import Stream
 
 
 def rftn_plot(eqr_st, eqt_st, start_second=-1, end_second=10,
@@ -85,6 +86,7 @@ def _calulate_startend_sample(delta, starttime, plot_start, plot_end):
 def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
              label_position="left", ylabel="Back Azimuth"):
     """ Plot receiver functions by back azimuth """
+    st.normalize(global_max=True)
     for tr in st:
         baz = tr.stats.sac['baz']
         tr_start = tr.stats.sac['b']
@@ -117,6 +119,7 @@ def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left",
               ylabel="Epicentral Distance ($^\circ$)"): # noqa
     """ Plot Receiver functions by distance (gcarc) """
+    st.normalize(global_max=True)
     for tr in st:
         dist = tr.stats.sac['gcarc']
         tr_start = tr.stats.sac['b']
@@ -147,6 +150,7 @@ def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
 def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left", ylabel="Ray Parameter"):
     """ Plot receiver functions by ray parameter """
+    st.normalize(global_max=True)
     for tr in st:
         rayp = tr.stats.sac['user8']
         tr_start = tr.stats.sac['b']
@@ -166,12 +170,36 @@ def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
                         amplitudes[beg_sample:end_sample],
                         where=amplitudes[beg_sample:end_sample] < rayp,
                         facecolor='blue', interpolate=True, alpha=0.85)
-        ax.set_ylim(0.04, 0.081)
+        ax.set_ylim(0.04, 0.085)
         ax.set_xlabel("Time (s)")
         ax.set_ylabel(ylabel)
         if label_position == "right":
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
+
+
+def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
+    radial_st = Stream()
+    trans_st = Stream()
+    for tr in st:
+        if tr.stats.channel.lower() == 'radial':
+            radial_st += tr
+        elif tr.stats.channel.lower() == 'transv':
+            trans_st += tr
+        else:
+            print(f'{tr.id} Not a valid channel')
+
+    fig, ax = plt.subplots(2, 2, figsize=(8,11))
+    rayp_plot(ax[0][0], radial_st, scaling=0.005, plot_start=plot_start,
+              plot_end=plot_end)
+    baz_plot(ax[1][0], radial_st, scaling=20, ylabel="Radial RF Back Azimuth",
+             plot_start=plot_start, plot_end=plot_end)
+    baz_plot(ax[1][1], trans_st, scaling=20, label_position="Right",
+             ylabel="Transverse RF Back Azimuth", plot_start=plot_start,
+             plot_end=plot_end)
+    dist_plot(ax[0][1], radial_st, scaling=8, label_position="right",
+              plot_start=plot_start, plot_end=plot_end)
+    plt.savefig(filename)
 
 
 def base_map(projection='local', center_lat=0, center_lon=0, extent=None,
