@@ -310,7 +310,7 @@ def rfplots():
             sta_total_rf_plot(st, plot_start=float(plot_start),
                               plot_end=float(plot_end),
                               filename=os.path.join(app.root_path, plot))
-            plots.append(plot)
+            plots.append([plot, filt.filter])
         return render_template('rfplots.html', plots=plots, stas=stations)
     return render_template('rfplots.html', stas=stations)
 

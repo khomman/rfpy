@@ -194,7 +194,7 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
               plot_end=plot_end)
     baz_plot(ax[1][0], radial_st, scaling=20, ylabel="Radial RF Back Azimuth",
              plot_start=plot_start, plot_end=plot_end)
-    baz_plot(ax[1][1], trans_st, scaling=20, label_position="Right",
+    baz_plot(ax[1][1], trans_st, scaling=20, label_position="right",
              ylabel="Transverse RF Back Azimuth", plot_start=plot_start,
              plot_end=plot_end)
     dist_plot(ax[0][1], radial_st, scaling=8, label_position="right",
