@@ -1,31 +1,27 @@
 {% extends "view.html" %}
 {% block content %}
     <form method="post" action="">
-        <div class="form-container">
-            <div class="form-group">
-                <label for="staselect">Station</label>
-                <select name=staselect id=staselect>
-                    <option>Select a station</option>
-                        {% for sta in stas %}
-                            <option value="{{ sta.station }}">{{sta.station}}</option>
-                        {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="startTime">Plot Start Second</label>
-                <input type="number" name="startTime" maxlength="4" size="4" value="-2" min="-10.0" max="100.0"/>
-                <label for="endTime">Plot End Second</label>
-                <input type="number" name="endTime" maxlength="4" size="4" value="30.0" min="-9.0" max="100.0"/>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Submit">
-            </div>
+        <div class="qc-form">
+            <select name=staselect id=staselect>
+                <option>Select a station</option>
+                    {% for sta in stas %}
+                        <option value="{{ sta.station }}">{{sta.station}}</option>
+                    {% endfor %}
+            </select>
+            <label for="startTime">Start time</label>
+            <input type="number" name="startTime" maxlength="4" size="4" value="-2" min="-10.0" max="100.0"/>
+            <label for="endTime">End time</label>
+            <input type="number" name="endTime" maxlength="4" size="4" value="30" min="-9.0" max="100.0"/>
+            <input type="submit" value="Submit">
         </div>
     </form>
     {% if result != None %}
         <div class="rf-plot-container">
             {% for plot in plots %}
-                <div class="rf-plot"><img src="{{ plot }}"/></div>
+                <div class="rf-plot">
+                    <h3>Filter: {{ plot[1] }}</h3>
+                    <img src="{{ plot[0] }}"/>
+                </div>
             {% endfor %}
         </div>
     {% endif %}

@@ -55,17 +55,19 @@ html, body {
 }
 
 /* QC */
-#qc-form {
+.qc-form {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-bottom: 1px solid var(--nav-color);
+    box-shadow: 1px 1px var(--nav-color);
 }
 
-#qc-form input {
+.qc-form input {
     margin: 10px;
 }
 
-#qc-form select {
+.qc-form select {
     margin: 10px;
 }
 .rftn-plots {
@@ -218,7 +220,6 @@ html, body {
     justify-content: center;
     flex-shrink: 1;
     margin: 0;
-    border: 1px solid red;
 }
 
 
@@ -226,4 +227,21 @@ html, body {
     margin: 5px;
     box-shadow: 1px 1px 1px var(--nav-color);
     width: 90%;
+}
+
+.rf-plot-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.rf-plot {
+    margin: 2em;
+}
+
+.rf-plot img {
+    flex: 1 1 400px;
+    box-shadow: 1px 1px 1px var(--nav-color);
+
 }
