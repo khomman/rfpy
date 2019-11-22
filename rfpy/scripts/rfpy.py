@@ -35,6 +35,11 @@ def add_stations(station_file):
 @click.option('-f', '--rftn_file')
 @click.option('-p', '--data_path')
 def add_rftns(rftn_file, data_path):
+    """
+    Add receiver functions to database.  -f, --rftn_file reads receiver
+    function paths from file. -p, --data_path searches a directory structure
+    for receiver functions to add
+    """
     if rftn_file:
         filt_count = 0
         rf_count = 0
@@ -63,6 +68,7 @@ def add_rftns(rftn_file, data_path):
         print(f'Added {filt_count} Filters and {rf_count} receiver functions')
 
     if data_path:
+        # TODO: Implement directory search for adding rftn
         print(data_path)
 
 

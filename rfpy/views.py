@@ -232,6 +232,7 @@ def plots():
 
 @app.route('/stationmap')
 def stationmap():
+    """ View for stationmap plot """
     stations = Stations.query.all()
     sta_lats = []
     sta_lons = []

@@ -10,14 +10,14 @@ from obspy import Stream
 
 def rftn_plot(eqr_st, eqt_st, start_second=-1, end_second=10,
               base_path=os.getcwd()):
-    '''
+    """
     Create individual plots of receiver functions.
     :param eqr_st: Obspy Stream of radial receiver functions
     :param eqt_st: Obspy Stream of transverse receiver functions
     :param start_second: Seconds before P-arrival to plot
     :param end_second: Seconds after P-arrival to plot
     :param base_path: Path to prepend to static/*svg
-    '''
+    """
     plotfiles = []
     eqr_st = eqr_st.sort(['name'])
     eqt_st = eqt_st.sort(['name'])
@@ -77,7 +77,16 @@ def rftn_plot(eqr_st, eqt_st, start_second=-1, end_second=10,
     return plotfiles
 
 
-def _calulate_startend_sample(delta, starttime, plot_start, plot_end):
+def _calculate_startend_sample(delta, starttime, plot_start, plot_end):
+    """
+    Helper function that calculates sample value for starting and ending the
+    plot
+    :param delta: Sample distance in seconds.  See Obspy.core.trace.Stats
+    :param starttime: Starttime, in seconds, of file. See trace.stats.sac['b']
+    :param plot_start: Seconds from starttime to start plot
+    :param plot_end: Seconds after starttime to end plot
+    :return: start, end samples
+    """
     beg_sample = int(-1*starttime/delta + plot_start/delta)
     end_sample = int(-1*starttime/delta + plot_end/delta)
     return beg_sample, end_sample
@@ -91,9 +100,9 @@ def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
         baz = tr.stats.sac['baz']
         tr_start = tr.stats.sac['b']
         delta = tr.stats.delta
-        beg_sample, end_sample = _calulate_startend_sample(delta, tr_start,
-                                                           plot_start,
-                                                           plot_end)
+        beg_sample, end_sample = _calculate_startend_sample(delta, tr_start,
+                                                            plot_start,
+                                                            plot_end)
         times = tr.times() + tr_start
         amplitudes = (tr.data * scaling) + baz
         ax.plot(times[beg_sample:end_sample],
@@ -118,15 +127,24 @@ def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
 def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left",
               ylabel="Epicentral Distance ($^\circ$)"): # noqa
-    """ Plot Receiver functions by distance (gcarc) """
+    """
+    Plot Receiver functions by distance (gcarc)
+    :param ax: Matplotlib ax object
+    :param st: Obspy Stream object
+    :param scaling: Scale the trace data
+    :param plot_start: Seconds from starttime to start plot
+    :param plot_end: Seconds from starttime to end plot
+    :param label_position: Which side to place the y-axis label
+    :param ylabel: String for y-axis label
+    """
     st.normalize(global_max=True)
     for tr in st:
         dist = tr.stats.sac['gcarc']
         tr_start = tr.stats.sac['b']
         delta = tr.stats.delta
-        beg_sample, end_sample = _calulate_startend_sample(delta, tr_start,
-                                                           plot_start,
-                                                           plot_end)
+        beg_sample, end_sample = _calculate_startend_sample(delta, tr_start,
+                                                            plot_start,
+                                                            plot_end)
         times = tr.times() + tr_start
         amplitudes = (tr.data * scaling) + dist
         ax.plot(times[beg_sample:end_sample],
@@ -149,15 +167,24 @@ def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
 
 def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left", ylabel="Ray Parameter"):
-    """ Plot receiver functions by ray parameter """
+    """
+    Plot receiver functions by ray parameter
+    :param ax: Matplotlib ax object
+    :param st: Obspy Stream object
+    :param scaling: Scale the trace data
+    :param plot_start: Seconds from starttime to start plot
+    :param plot_end: Seconds from starttime to end plot
+    :param label_position: Which side to place the y-axis label
+    :param ylabel: String for y-axis label
+    """
     st.normalize(global_max=True)
     for tr in st:
         rayp = tr.stats.sac['user8']
         tr_start = tr.stats.sac['b']
         delta = tr.stats.delta
-        beg_sample, end_sample = _calulate_startend_sample(delta, tr_start,
-                                                           plot_start,
-                                                           plot_end)
+        beg_sample, end_sample = _calculate_startend_sample(delta, tr_start,
+                                                            plot_start,
+                                                            plot_end)
         times = tr.times() + tr_start
         amplitudes = (tr.data * scaling) + rayp
         ax.plot(times[beg_sample:end_sample],
@@ -179,6 +206,14 @@ def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
 
 
 def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
+    """
+    Generate "total plot". "Total plot" is a figure composed from 4 other
+    figures; rayp_plot, baz_plot, and dist_plot. See "static/rayp_thumb.png"
+    :param st: Obspy Stream object
+    :param plot_start: Seconds from starttime to start plot
+    :param plot_end: Seconds from starttime to end plot
+    :param filename: Name for saved file
+    """
     radial_st = Stream()
     trans_st = Stream()
     for tr in st:
@@ -189,7 +224,7 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
         else:
             print(f'{tr.id} Not a valid channel')
 
-    fig, ax = plt.subplots(2, 2, figsize=(8,11))
+    fig, ax = plt.subplots(2, 2, figsize=(8, 11))
     rayp_plot(ax[0][0], radial_st, scaling=0.005, plot_start=plot_start,
               plot_end=plot_end)
     baz_plot(ax[1][0], radial_st, scaling=20, ylabel="Radial RF Back Azimuth",
@@ -204,9 +239,13 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
 
 def base_map(projection='local', center_lat=0, center_lon=0, extent=None,
              **kwargs):
-    '''
+    """
     Function to plot a basic map which can be used to add data later.
-    '''
+    :param projection: Cartopy projection string
+    :param center_lat: Latitude to center map
+    :param center_lon: Longitude to center map
+    :param extent: List of coordinates for map boundaries
+    """
     plt.figure()
     if projection == 'global':
         ax = plt.axes(projection=ccrs.Mollweide(central_longitude=center_lon))
@@ -227,6 +266,14 @@ def base_map(projection='local', center_lat=0, center_lon=0, extent=None,
 
 
 def _calculate_extent_with_cushion(lats, lons):
+    """
+    Tries to compute a reasonable "cushion" of space around station coordinates
+    for better plotting.  Returns limits for plotting of from
+    [min_lon, max_lon, min_lat, max_lat]
+    :param lats: List of latitude values
+    :param lons: List of longitude values
+    """
+
     max_lat = max(lats)
     min_lat = min(lats)
     max_lon = max(lons)
@@ -251,7 +298,7 @@ def _calculate_extent_with_cushion(lats, lons):
 
 def station_map(sta_lats, sta_lons, sta_names=None, projection='local',
                 filename=None):
-    '''
+    """
     Plot a simple station map.  Currently only uses one color and symbol.
     :param sta_lats: List of latitudes for stations
     :type sta_lats: List
@@ -262,7 +309,7 @@ def station_map(sta_lats, sta_lons, sta_names=None, projection='local',
     :param projection: Type of projection to use.  Currently supports
                         'local' and 'global'
     :type projection: Str
-    '''
+    """
     center_lat = np.mean(sta_lats)
     center_lon = np.mean(sta_lons)
     data_crs = ccrs.Geodetic()
@@ -292,9 +339,16 @@ def station_map(sta_lats, sta_lons, sta_names=None, projection='local',
 
 def hk_map(sta_lats, sta_lons, hk_vals, sta_names=None, projection='local',
            filename=None):
-    '''
+    """
     Plots a simple map of stations colored by HK stack results
-    '''
+    :param sta_lats: List of station latitudes
+    :param sta_lons: List of station longitudes
+    :param hk_vals: List of tuples for depth and kappa values...
+        [(41, 1.7), (38, 1.82), ..., (35.5, 1.75)]
+    :param sta_names: List of station names
+    :param projection: Cartopy projection type
+    :param filename: Filename for saving figure
+    """
     center_lat = np.mean(sta_lats)
     center_lon = np.mean(sta_lons)
     data_crs = ccrs.Geodetic()
