@@ -5,4 +5,5 @@ instance/
 docs/_build/
 rfpy/static/*.svg
 .vscode/
-rfpy/.vscode/
+rfpy/.vscode/settings.json
+sampledata/

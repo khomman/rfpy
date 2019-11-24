@@ -1,3 +1,16 @@
 {% extends "view.html" %}
 {% block content %}
+    <div class='dbAdmin-grid-container'>
+        <div class='sidebar'>
+            <ul>
+                {% for table in tables %}
+                    <li class="tables" data-tb="{{ table[1] }}">{{ table[0] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="resultsTable">
+            <table id="resultsTable"></table>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='dbAdmin.js') }}"></script>
 {% endblock %}

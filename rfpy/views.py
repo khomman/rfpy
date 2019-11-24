@@ -1,7 +1,7 @@
 import os
 from shutil import copyfile
 
-from flask import render_template, request, url_for, flash, redirect
+from flask import render_template, request, url_for, flash, redirect, jsonify
 from rfpy import app, db
 from .hkstack import HKStack
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions
@@ -318,7 +318,28 @@ def rfplots():
 
 @app.route('/dbAdmin')
 def dbAdmin():
-    return render_template('dbAdmin.html')
+    tables = [['HKResults', 'hk'], ['Filters', 'filter'],
+              ['Receiver Functions', 'rftn'], ['Stations', 'station']]
+    return render_template('dbAdmin.html', tables=tables)
+
+
+@app.route('/getTables', methods=['GET', 'POST'])
+def getTables():
+    table = request.args.get('table')
+    if table == 'hk':
+        data = HKResults.query.all()
+    elif table == 'station':
+        data = Stations.query.all()
+    elif table == 'filter':
+        data = Filters.query.all()
+    elif table == 'rftn':
+        data = ReceiverFunctions.query.all()
+    else:
+        flash('That table is not available')
+        return redirect(url_for('dbAdmin'))
+
+    data_list = [d.as_dict() for d in data]
+    return jsonify(data_list)
 
 
 @app.after_request
