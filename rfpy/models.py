@@ -21,6 +21,11 @@ class Stations(db.Model):
         return f'<Station: {self.id}, {self.station}, {self.latitude}, '\
                 f'{self.longitude}, {self.elevation}, {self.status}>'
 
+    def as_dict(self):
+        return {'ID': self.id, 'name': self.station, 'latitude': self.latitude,
+                'longitude': self.longitude, 'elevation': self.elevation,
+                'status': self.status}
+
 
 class Filters(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -34,6 +39,9 @@ class Filters(db.Model):
 
     def __repr__(self):
         return f'<Filter Center: {self.id}, {self.filter}'
+
+    def as_dict(self):
+        return {'ID': self.id, 'Filter': self.filter}
 
 
 class HKResults(db.Model):
@@ -51,6 +59,11 @@ class HKResults(db.Model):
     def __repr__(self):
         return f'<Station: {self.station}, H: {self.h}, K: {self.k}>'
 
+    def as_dict(self):
+        return {'ID': self.id, 'station': self.station, 'filter': self.filter,
+                'depth': self.h, 'sigmah': self.sigmah, 'kappa': self.k,
+                'sigmak': self.sigmak, 'vp': self.vp}
+
 
 class ReceiverFunctions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,3 +76,8 @@ class ReceiverFunctions(db.Model):
     def __repr__(self):
         return f'<Station: {self.station} id: {self.id}, Accepted:'\
                 f'{self.accepted}'
+
+    def as_dict(self):
+        return {'ID': self.id, 'station': self.station, 'filter': self.filter,
+                'path': self.path, 'newData': self.new_receiver_function,
+                'accepted': self.accepted}
