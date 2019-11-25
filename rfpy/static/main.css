@@ -245,3 +245,64 @@ html, body {
     box-shadow: 1px 1px 1px var(--nav-color);
 
 }
+
+/* dbAdmin */
+.dbAdmin-grid-container {
+    display: grid;
+    grid-template-columns: 10px 200px 1fr 50px;
+}
+
+.sidebar {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.sidebar ul li:hover {
+    background: var(--nav-color);
+    color: var(--nav-text);
+    transition: all .1s ease-in-out;
+    scale: 1.1;
+    border-radius: 3px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: var(--nav-color);
+}
+
+.sidebar a:hover {
+    color: var(--nav-text);
+}
+
+.resultsTable {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#resultsTable {
+    border-collapse: collapse;
+    border: 1px solid var(--nav-color);
+    border-radius: 5px;
+}
+
+#resultsTable td {
+    text-align: center;
+}
+#resultsTable tbody tr:nth-child(odd){
+    background-color: var(--background-white);
+}
+#resultsTable tbody tr:nth-child(even){
+    background-color: var(--stations-table-even);
+}
