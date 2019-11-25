@@ -1,7 +1,8 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<link rel="stylesheet" href={{ url_for('static', filename='main.css') }} type="text/css">
+		<link href="./static/css/all.css" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" type="text/css">
 		{% block head %}
 		{% endblock %}
 	</head>

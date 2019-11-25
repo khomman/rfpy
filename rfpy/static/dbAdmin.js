@@ -18,9 +18,10 @@ function generateTableHead(table, data) {
 }
 
 function generateTable(table, data) {
-    for (element of data) {
-        const row = table.insertRow();
-        for (key in element) {
+    const tbody = table.createTBody();
+    for (let element of data) {
+        const row = tbody.insertRow();
+        for (let key in element) {
             let cell = row.insertCell();
             let text = document.createTextNode(element[key]);
             cell.appendChild(text);
@@ -33,6 +34,8 @@ async function displayResults() {
     url = `http://127.0.0.1:5000/getTables?table=${dbtable}`;
     const data = await getTableData(url);
     resultsTable.deleteTHead();
+    tbody = resultsTable.getElementsByTagName('tbody')[0];
+    if (tbody) {resultsTable.removeChild(tbody)};
     //resultsTable.delete();
     generateTableHead(resultsTable, data[0]);
     generateTable(resultsTable, data);
