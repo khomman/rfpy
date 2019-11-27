@@ -292,7 +292,7 @@ html, body {
 }
 
 #resultsTable {
-    border-collapse: collapse;
+    border-spacing: 0;
     border: 1px solid var(--nav-color);
     border-radius: 5px;
 }
