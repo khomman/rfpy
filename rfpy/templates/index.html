@@ -1,5 +1,15 @@
 {% extends "view.html" %}
 {% block content %}
+<div id="messages" class="messages hidden-message"></div>
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				<div class="flask-messages">
+					{% for message in messages %}
+						<h2>{{ message }}</h2>
+					{% endfor %}
+				</div>
+			{% endif %}
+		{% endwith %}
 <div class="progress-bars">
     <div id="qc">
         <div class="base-progress">

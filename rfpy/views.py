@@ -316,7 +316,7 @@ def rfplots():
     return render_template('rfplots.html', stas=stations)
 
 
-@app.route('/dbAdmin')
+@app.route('/dbAdmin', methods=['GET', 'POST'])
 def dbAdmin():
     tables = [['HKResults', 'hk'], ['Filters', 'filter'],
               ['Receiver Functions', 'rftn'], ['Stations', 'station']]
@@ -340,6 +340,28 @@ def getTables():
 
     data_list = [d.as_dict() for d in data]
     return jsonify(data_list)
+
+
+@app.route('/exportData', methods=['GET', 'POST'])
+def exportData():
+    stas = Stations.query.all()
+    hk = HKResults.query.all()
+
+    with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Stations.txt', 'w') as f:
+        f.write('Station Latitude Longitude Elevation\n')
+        for s in stas:
+            f.write(f'{s.station} {s.latitude} {s.longitude} {s.elevation}\n')
+
+    with open(f'{app.config["BASE_EXPORT_PATH"]}HK_Results.txt', 'w') as f:
+        f.write('Station Latitude Longitude Elevation Filter Depth SigmaDepth')
+        f.write('Kappa SigmaKappa Vp\n')
+        for i in hk:
+            f.write(f'{i.hk_station.station} {i.hk_station.latitude} ')
+            f.write(f'{i.hk_station.longitude} {i.hk_station.elevation} ')
+            f.write(f'{i.hk_filter.filter} {i.h} {i.sigmah} {i.k} {i.sigmak} ')
+            f.write(f'{i.vp}\n')
+    flash(f'Data saved to {app.config["BASE_EXPORT_PATH"]}')
+    return redirect(url_for('index'))
 
 
 @app.after_request
