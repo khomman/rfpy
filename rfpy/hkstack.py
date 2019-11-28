@@ -254,13 +254,8 @@ class HKStack:
         # self.sigmah = np.round(np.std(bs_depths),1)
         self.sigmak = np.std(bs_kappas)
         self.sigmah = np.std(bs_depths)
-        self.correl = 100.0*sumhk/(self.bs_replications-1)/self.sigmak/self.sigmah
-        # self.correl = 100.0*sumhk/(self.sigmak*self.sigmah)
-        print(sumhk)
-        tmp = np.cov(bs_depths, bs_kappas)
-        print(tmp)
-        print(np.corrcoef(bs_depths, y=bs_kappas))
-        # self.correl = np.corrcoef(bs_depths,y=bs_kappas)[0][1]
+        # self.correl = 100.0*sumhk/(self.bs_replications-1)/self.sigmak/self.sigmah
+        self.correl = np.corrcoef(bs_depths,y=bs_kappas)[0][1]
         return self.sigmak, self.sigmah, self.correl
 
     def _covariance_ellipse(self):
@@ -269,12 +264,12 @@ class HKStack:
         y_ell = np.zeros(self.nell)
         t = np.zeros(self.nell)
         # compute tilting
-        corr = self.correl/100.0
+        #corr = self.correl/100.0
+        corr = self.correl
         sigh = self.sigmah
         sigk = self.sigmak
         tilt = np.arctan(2.0*corr*sigh*sigk/(sigh*sigh-sigk*sigk))
         tilt = tilt/2.0
-        print(tilt)
         # Compute Semidiameters of ellipse
         p1 = sigh*sigh*sigk*sigk*(1-corr*corr)/(sigk*sigk*np.cos(tilt)*
             np.cos(tilt)-2.0*corr*sigh*sigk*np.sin(tilt)*np.cos(tilt)+sigh*sigh*
@@ -282,7 +277,6 @@ class HKStack:
         p2 = sigh*sigh*sigk*sigk*(1-corr*corr)/(sigk*sigk*np.sin(tilt)*
             np.sin(tilt)+2.0*corr*sigh*sigk*np.sin(tilt)*np.cos(tilt)+sigh*sigh*
             np.cos(tilt)*np.cos(tilt))
-        print(sigh, sigk, corr, tilt, p1, p2)
         # Compute the actual 95% confidence ellipse
         nellarr = np.arange(0, self.nell, 1)
         t = nellarr*2*np.pi/self.nell
