@@ -34,7 +34,7 @@ class Filters(db.Model):
     receiver_functions = db.relationship('ReceiverFunctions',
                                          backref='filter_receiver_functions',
                                          lazy='dynamic')
-    hkresult = db.relationship('HKResults', backref='hk_filter',
+    hks = db.relationship('HKResults', backref='hk_filter',
                                lazy='dynamic')
 
     def __repr__(self):

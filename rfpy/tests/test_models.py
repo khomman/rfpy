@@ -1,5 +1,7 @@
 import os
 
+from sqlalchemy import create_engine
+
 from rfpy import db
 from rfpy.models import Stations, ReceiverFunctions, HKResults, Filters
 
@@ -83,12 +85,9 @@ def test_add_filters():
     assert filt == filt_query
 
 
-def test_relationships():
+def build_test_data():
     # First drop and rebuild the tables from prior test
-    Stations.__table__.drop()
-    ReceiverFunctions.__table__.drop()
-    HKResults.__table__.drop()
-    Filters.__table__.drop()
+    db.drop_all()
     setup_db()
 
     # add more rftn, stations, hkresults, and filters
@@ -125,8 +124,62 @@ def test_relationships():
     db.session.add(filt_two)
     db.session.commit()
 
-    # Stations and rf relationships, 1st station should have 5 rftn
+
+def test_relationships():
+    build_test_data()
+    # Stations and rf relationships, 1st station should have 5 rftn, 2nd 9
     first_sta = Stations.query.get(1)
+    first_sta_receiver_functions = [i for i in first_sta.receiver_functions]
     second_sta = Stations.query.get(2)
-    assert len(first_sta.station_receiver_functions) == 5
-    assert len(second_sta.station_receiver_functions) == 5
+    second_sta_receiver_functions = [i for i in second_sta.receiver_functions]
+    assert len(first_sta_receiver_functions) == 5
+    assert len(second_sta_receiver_functions) == 9
+
+    # Stations and hk relationship
+    first_hk = [i for i in first_sta.hks]
+    second_hk = [i for i in second_sta.hks]
+    assert len(first_hk) == 1
+    assert len(second_hk) == 1
+    assert first_hk[0].h == 3.5
+    assert first_hk[0].k == 1.7
+    assert second_hk[0].h == 44.5
+    assert second_hk[0].k == 1.77
+
+    first_filt = Filters.query.get(1)
+    first_filt_rf = [i for i in first_filt.receiver_functions]
+    second_filt = Filters.query.get(2)
+    second_filt_rf = [i for i in second_filt.receiver_functions]
+    assert len(first_filt_rf) == 5
+    assert len(second_filt_rf) == 9
+
+    first_filt_hk = [i for i in first_filt.hks]
+    second_filt_hk = [i for i in second_filt.hks]
+    assert len(first_filt_hk) == 1
+    assert len(second_filt_hk) == 1
+
+
+def test_backref():
+    build_test_data()
+    # hk backrefs
+    hks = HKResults.query.all()
+    backref_station_first = hks[0].hk_station
+    backref_station_second = hks[1].hk_station
+    backref_filt_first = hks[0].hk_filter
+    backref_filt_second = hks[1].hk_filter
+    assert backref_station_first.station == 'PE_PARS'
+    assert backref_station_second.station == 'PE_PAKC'
+    assert backref_filt_first.filter == 2.5
+    assert backref_filt_second.filter == 1.0
+
+    # rftn backrefs
+    rfs = ReceiverFunctions.query.all()
+    backref_station_first = rfs[0].station_receiver_functions
+    backref_station_last = rfs[-1].station_receiver_functions
+    backref_filt_first = rfs[0].filter_receiver_functions
+    backref_filt_last = rfs[-1].filter_receiver_functions
+    assert backref_station_first.station == 'PE_PARS'
+    assert backref_station_last.station == 'PE_PAKC'
+    assert backref_filt_first.filter == 2.5
+    assert backref_filt_last.filter == 1.0
+
+    teardown_db()
