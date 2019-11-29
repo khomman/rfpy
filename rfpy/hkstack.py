@@ -1,4 +1,6 @@
 import os
+from multiprocessing import Pool
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -225,6 +227,11 @@ class HKStack:
             self.bootstrap_st += self.stream[rfid]
         return self.bootstrap_st
 
+    def _bootstrap_iter(self, iter):
+        bootstrap_st = self._make_bootstrap_st()
+        stack, maxh, maxk, vs = self._do_hkstack(is_bs=True)
+        return maxh, maxk
+
     def _do_bootstrap(self):
         """
         Computes the bootstrapping method of Efron and Tibshirani, 1980.
@@ -238,12 +245,21 @@ class HKStack:
         bs_depths = np.zeros(self.bs_replications)
 
         # multi-process this?  Just split bs_reps into 2 or 4 sections?
-        for rep in range(self.bs_replications):
-            print('Bootstrap #: ' + str(rep))
-            bootstrap_st = self._make_bootstrap_st()
-            stack, maxh, maxk, vs = self._do_hkstack(is_bs=True)
-            bs_kappas[rep] = maxk
-            bs_depths[rep] = maxh
+        # for rep in range(self.bs_replications):
+        #     print('Bootstrap #: ' + str(rep))
+        #     bootstrap_st = self._make_bootstrap_st()
+        #     stack, maxh, maxk, vs = self._do_hkstack(is_bs=True)
+        #     bs_kappas[rep] = maxk
+        #     bs_depths[rep] = maxh
+
+        # The below multiprocessing Pool implementation speeds up bootstrapping
+        # significantly.  For test the computation time went from 5:47.40 to
+        # 2:34.25
+        pool = Pool()
+        pool_result = pool.map(self._bootstrap_iter, range(self.bs_replications))
+        for i in range(self.bs_replications):
+            bs_kappas[i] = pool_result[i][1]
+            bs_depths[i] = pool_result[i][0]
 
         kavg = np.mean(bs_kappas)
         havg = np.mean(bs_depths)
