@@ -1,7 +1,5 @@
 import os
 
-from sqlalchemy import create_engine
-
 from rfpy import db
 from rfpy.models import Stations, ReceiverFunctions, HKResults, Filters
 
@@ -14,7 +12,9 @@ def teardown_db():
     db.session.remove()
     db.drop_all()
     os.remove('db/rftns.db')
-    os.rmdir('db/')
+    os.rmdir('db')
+    os.rmdir('plots')
+    os.rmdir('exports')
 
 
 def test_stations():
