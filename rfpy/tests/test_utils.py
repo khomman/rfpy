@@ -1,8 +1,33 @@
 import os
+import shutil
 
-import numpy as np
+from rfpy.util import read_station_file, read_rftn_file, read_rftn_directory
 
-from rfpy.util import read_station_file, read_rftn_file
+
+def build_test_directory_structure():
+    stas = ['PE_PAKC', 'TA_O54A']
+    pe_filts = ['1.0', '5.0']
+    ta_filts = ['2.5']
+    os.mkdir('TestData')
+    os.mkdir('TestData/Data')
+    for sta in stas:
+        os.mkdir(f'TestData/Data/{sta}')
+        if sta.startswith('PE'):
+            for f in pe_filts:
+                os.mkdir(f'TestData/Data/{sta}/{f}')
+                with open(f'TestData/Data/{sta}/{f}/tmp1', 'w'):
+                    pass
+                with open(f'TestData/Data/{sta}/{f}/tmp2', 'w'):
+                    pass
+        if sta.startswith('TA'):
+            for f in ta_filts:
+                os.mkdir(f'TestData/Data/{sta}/{f}')
+                with open(f'TestData/Data/{sta}/{f}/tmp1', 'w'):
+                    pass
+
+
+def teardown_test_directory_structure():
+    shutil.rmtree('TestData')
 
 
 def build_test_station_file():
@@ -48,3 +73,18 @@ def test_read_rftn_file():
     assert rf['TA_O56A']['1.0'] == ['/path/to/data/1']
     assert rf['TA_O56A']['2.5'] == ['/path/to/data/2']
     teardown_test_files()
+
+
+def test_read_rftn_directory():
+    cur = os.getcwd()
+    build_test_directory_structure()
+    rfs = read_rftn_directory(os.path.join(cur, 'TestData'))
+    assert 'TA_O54A' in rfs
+    assert 'PE_PAKC' in rfs
+    assert '1.0' in rfs['PE_PAKC']
+    assert '5.0' in rfs['PE_PAKC']
+    assert '2.5' in rfs['TA_O54A']
+    assert len(rfs['PE_PAKC']['1.0']) == 2
+    assert len(rfs['TA_O54A']['2.5']) == 1
+    assert rfs['PE_PAKC']['5.0'][0] == f'{cur}/TestData/Data/PE_PAKC/5.0/tmp2'
+    teardown_test_directory_structure()
