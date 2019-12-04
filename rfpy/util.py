@@ -1,7 +1,7 @@
+import os
+import glob
+
 from obspy import read, Stream
-# from rfpy import app, db
-# from rfpy.models import Stations, Data, Filters, HKResults
-# from config import DATA_ARCHIVE_STRUCTURE
 
 
 def read_station_file(stafile):
@@ -47,6 +47,40 @@ def read_rftn_file(rftn_file):
 
             data_paths[station][filter].append(path)
 
+    return data_paths
+
+
+def read_rftn_directory(basedir='.'):
+    """
+    Search a directory structure, identified by basedir, for receiver functions
+    and returns a dictionary of paths.  Basedir defaults to current directory.
+    The directory tree within basedir is expected to be
+    -basedir
+        -Data
+            -StationName (net_sta...PE_PAKC)
+                -Filter (eg. 1.0, 2.5, etc)
+                    -receiver functions
+    :param basedir: Top level directory on disk where data lives
+    :return: Dictionary of stations receiver functions
+    """
+    data_paths = {}
+    base = os.path.join(os.path.expanduser(basedir), 'Data')
+    stas = next(os.walk(base))[1]
+    for sta in stas:
+        if sta not in data_paths:
+            data_paths[sta] = {}
+
+        new_path = os.path.join(base, sta)
+        filts = next(os.walk(new_path))[1]
+
+        for filt in filts:
+            if filt not in data_paths[sta]:
+                data_paths[sta][filt] = []
+
+            rfs_path = os.path.join(new_path, filt)
+            rfs = glob.glob(f'{rfs_path}/*')
+            for rf in rfs:
+                data_paths[sta][filt].append(rf)
     return data_paths
 
 

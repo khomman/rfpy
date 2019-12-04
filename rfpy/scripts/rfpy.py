@@ -46,6 +46,9 @@ def add_rftns(rftn_file, data_path):
         rftns = read_rftn_file(rftn_file)
         for key in rftns:
             sta_id = Stations.query.filter_by(station=key).first().id
+            if not sta_id:
+                raise LookupError("Station not in database: Please run"
+                                  "add_stations command first")
             for k, v in rftns[key].items():
                 # Try to grab the filter id.  If it doesn't exist then add the
                 # filter to the database and get the id
