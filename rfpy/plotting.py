@@ -93,7 +93,7 @@ def _calculate_startend_sample(delta, starttime, plot_start, plot_end):
 
 
 def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
-             label_position="left", ylabel="Back Azimuth"):
+             label_position="left", ylabel="Back Azimuth", title=None):
     """ Plot receiver functions by back azimuth """
     st.normalize(global_max=True)
     for tr in st:
@@ -122,11 +122,13 @@ def baz_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
         if label_position == "right":
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
+        if title:
+            ax.set_title(title)
 
 
 def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
               label_position="left",
-              ylabel="Epicentral Distance ($^\circ$)"): # noqa
+              ylabel="Epicentral Distance ($^\circ$)", title=None): # noqa
     """
     Plot Receiver functions by distance (gcarc)
     :param ax: Matplotlib ax object
@@ -163,10 +165,12 @@ def dist_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
         if label_position == "right":
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
+        if title:
+            ax.set_title(title)
 
 
 def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
-              label_position="left", ylabel="Ray Parameter"):
+              label_position="left", ylabel="Ray Parameter", title=None):
     """
     Plot receiver functions by ray parameter
     :param ax: Matplotlib ax object
@@ -203,9 +207,12 @@ def rayp_plot(ax, st, scaling=1, plot_start=-2, plot_end=30,
         if label_position == "right":
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
+        if title:
+            ax.set_title(title)
 
 
-def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
+def sta_total_rf_plot(st, plot_start=-2, plot_end=30, title=None,
+                      filename='RaypFig.svg'):
     """
     Generate "total plot". "Total plot" is a figure composed from 4 other
     figures; rayp_plot, baz_plot, and dist_plot. See "static/rayp_thumb.png"
@@ -234,6 +241,9 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, filename='RaypFig.svg'):
              plot_end=plot_end)
     dist_plot(ax[0][1], radial_st, scaling=8, label_position="right",
               plot_start=plot_start, plot_end=plot_end)
+
+    if title:
+        plt.suptitle(title)
     plt.savefig(filename)
 
 
@@ -337,14 +347,13 @@ def station_map(sta_lats, sta_lons, sta_names=None, projection='local',
     return ax
 
 
-def hk_map(sta_lats, sta_lons, hk_vals, sta_names=None, projection='local',
-           filename=None):
+def hk_map(sta_lats, sta_lons, hk_vals, sta_names=None, filter=None,
+           projection='local', filename=None):
     """
     Plots a simple map of stations colored by HK stack results
     :param sta_lats: List of station latitudes
     :param sta_lons: List of station longitudes
-    :param hk_vals: List of tuples for depth and kappa values...
-        [(41, 1.7), (38, 1.82), ..., (35.5, 1.75)]
+    :param hk_vals: List of values for depths or kappas
     :param sta_names: List of station names
     :param projection: Cartopy projection type
     :param filename: Filename for saving figure
@@ -368,6 +377,8 @@ def hk_map(sta_lats, sta_lons, hk_vals, sta_names=None, projection='local',
             # TODO; Fix to scale with map size
             ax.text(sta_lons[i]-0.2, sta_lats[i]+0.1, name,
                     transform=data_crs)
+    if filter:
+        plt.title(f'Filter: {filter}')
     plt.colorbar(im, ax=ax)
     if filename:
         plt.savefig(filename)
