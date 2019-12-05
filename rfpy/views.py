@@ -277,8 +277,10 @@ def hkmap():
         kappa_plot = f'static/kappa_map_{f}.svg'
         plots.append([depth_plot, kappa_plot])
         hk_map(sta_lats, sta_lons, depth_vals, sta_names=sta_names,
+               filter=filt.filter,
                filename=os.path.join(app.root_path, depth_plot))
         hk_map(sta_lats, sta_lons, kappa_vals, sta_names=sta_names,
+               filter=filt.filter,
                filename=os.path.join(app.root_path, kappa_plot))
 
     return render_template('plots.html', plot=plots,
@@ -310,8 +312,9 @@ def rfplots():
             plot = f'static/{sta}_{filt.filter}_totalPlot.svg'
             sta_total_rf_plot(st, plot_start=float(plot_start),
                               plot_end=float(plot_end),
+                              title=f'Station: {sta}    Filter: {filt.filter}',
                               filename=os.path.join(app.root_path, plot))
-            plots.append([plot, filt.filter])
+            plots.append(plot)
         return render_template('rfplots.html', plots=plots, stas=stations)
     return render_template('rfplots.html', stas=stations)
 

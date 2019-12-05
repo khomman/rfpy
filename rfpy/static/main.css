@@ -222,7 +222,19 @@ html, body {
     margin: 0;
 }
 
-
+.filter-hk {
+    height: 100vh;
+    width: 95%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 0;   
+}
+.filter-hk img {
+    margin: 5px;
+}
 .plot-types a img {
     margin: 5px;
     box-shadow: 1px 1px 1px var(--nav-color);
