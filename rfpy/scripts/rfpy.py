@@ -2,7 +2,7 @@ import click
 
 from rfpy import app, db
 from rfpy.models import Stations, ReceiverFunctions, Filters
-from rfpy.util import read_station_file, read_rftn_file
+from rfpy.util import read_station_file, read_rftn_file, read_rftn_directory
 
 
 @click.group()
@@ -71,8 +71,34 @@ def add_rftns(rftn_file, data_path):
         print(f'Added {filt_count} Filters and {rf_count} receiver functions')
 
     if data_path:
-        # TODO: Implement directory search for adding rftn
-        print(data_path)
+        filt_count = 0
+        rf_count = 0
+        rftns = read_rftn_directory(data_path)
+        for key in rftns:
+            sta_id = Stations.query.filter_by(station=key).first().id
+            if not sta_id:
+                raise LookupError("Station not in database: Please run"
+                                  "add_stations command first")
+            for k, v in rftns[key].items():
+                # Try to grab the filter id.  If it doesn't exist then add the
+                # filter to the database and get the id
+                try:
+                    filt_id = Filters.query.filter_by(filter=k).first().id
+                except AttributeError:
+                    f = Filters(filter=k)
+                    db.session.add(f)
+                    db.session.commit()
+                    filt_id = Filters.query.filter_by(filter=k).first().id
+                    filt_count += 1
+                for pth in v:
+                    rf = ReceiverFunctions(station=sta_id, filter=filt_id,
+                                           path=pth,
+                                           new_receiver_function=True,
+                                           accepted=True)
+                    db.session.add(rf)
+                    rf_count += 1
+        db.session.commit()
+        print(f'Added {filt_count} Filters and {rf_count} receiver functions')
 
 
 @cli.command('start')
