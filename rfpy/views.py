@@ -361,8 +361,8 @@ def exportData():
         for i in hk:
             f.write(f'{i.hk_station.station} {i.hk_station.latitude} ')
             f.write(f'{i.hk_station.longitude} {i.hk_station.elevation} ')
-            f.write(f'{i.hk_filter.filter} {i.h} {i.sigmah} {i.k} {i.sigmak} ')
-            f.write(f'{i.vp}\n')
+            f.write(f'{i.hk_filter.filter} {i.h} {round(i.sigmah, 1)} {i.k} ')
+            f.write(f'{round(i.sigmak, 2)} {i.vp}\n')
     flash(f'Data saved to {app.config["BASE_EXPORT_PATH"]}')
     return redirect(url_for('index'))
 

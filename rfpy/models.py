@@ -60,9 +60,10 @@ class HKResults(db.Model):
         return f'<Station: {self.station}, H: {self.h}, K: {self.k}>'
 
     def as_dict(self):
-        return {'ID': self.id, 'station': self.station, 'filter': self.filter,
-                'depth': self.h, 'sigmah': self.sigmah, 'kappa': self.k,
-                'sigmak': self.sigmak, 'vp': self.vp}
+        return {'ID': self.id, 'station': self.hk_station.station,
+                'filter': self.hk_filter.filter, 'depth': self.h,
+                'sigmah': round(self.sigmah, 1), 'kappa': self.k,
+                'sigmak': round(self.sigmak, 2), 'vp': self.vp}
 
 
 class ReceiverFunctions(db.Model):
@@ -78,6 +79,8 @@ class ReceiverFunctions(db.Model):
                 f'{self.accepted}'
 
     def as_dict(self):
-        return {'ID': self.id, 'station': self.station, 'filter': self.filter,
+        return {'ID': self.id,
+                'station': self.station_receiver_functions.station,
+                'filter': self.filter_receiver_functions.filter,
                 'path': self.path, 'newData': self.new_receiver_function,
                 'accepted': self.accepted}
