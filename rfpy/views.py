@@ -17,13 +17,15 @@ def index():
     for sta in stations:
         if sta.status == 'H':
             hk += 1
+            qc += 1
         elif sta.status == 'Q':
             qc += 1
         else:
             todo += 1
     status = {'total': total_sta, 'todo': todo, 'hk': hk, 'qc': qc,
               'qcpercent': int(100*(qc/total_sta)),
-              'hkpercent': int(hk/total_sta)}
+              'todopercent': int(100*(todo/total_sta)),
+              'hkpercent': int(100*(hk/total_sta))}
     return render_template('index.html', status=status, stations=stations)
 
 

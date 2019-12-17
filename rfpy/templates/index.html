@@ -9,8 +9,16 @@
 					{% endfor %}
 				</div>
 			{% endif %}
-		{% endwith %}
+        {% endwith %}
+<div class="progress-container">
 <div class="progress-bars">
+    <div id="todo">
+        <div class="base-progress">
+            <div class="progress" style="width:{{ status.todopercent }}%">
+                <span>Todo:{{ status.todopercent }}%</span>
+            </div>
+        </div>
+    </div>
     <div id="qc">
         <div class="base-progress">
             <div class="progress" style="width:{{ status.qcpercent }}%">
@@ -26,7 +34,9 @@
         </div>  
     </div>
 </div>
-<div class="sta-table">
+</div>
+<div class="home-sta-table-container">
+<div class="home-sta-table">
     <table>
         <thead>
             <th>Station</th>
@@ -41,5 +51,6 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 </div>
 {% endblock %}
