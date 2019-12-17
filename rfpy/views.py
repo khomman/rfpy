@@ -88,7 +88,7 @@ def qc():
             val = accepted[name_rad][0]
             dbid_rad = accepted[name_rad][1]
             dbid_trans = accepted[name_trans][1]
-            rftn_results.append([i, val, dbid_rad, dbid_trans])
+            rftn_results.append([i, val, dbid_rad, dbid_trans, sta])
         return render_template('rftnqc.html', stas=stations, filters=filters,
                                eqrresult=rftn_results)
     return render_template('rftnqc.html', stas=stations, filters=filters)
@@ -112,7 +112,11 @@ def doneqc():
             query_rad.accepted = False
             query_trans.accepted = False
 
-        db.session.commit()
+    station = request.json[-1][4]
+    print(station)
+    query_sta = Stations.query.filter_by(station=station).first()
+    query_sta.status = "Q"
+    db.session.commit()
 
     return redirect(url_for('qc'))
 

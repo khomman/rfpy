@@ -30,7 +30,7 @@
 			{% if result != None %}
 			{% for item in eqrresult %}
 				{% if item[1] == True %}
-					<div class="rftn-plots" id="{{ item[0] }}" data-dbid_rad="{{ item[2]}}" data-dbid_trans="{{ item[3] }}">
+					<div class="rftn-plots" id="{{ item[0] }}" data-dbid_rad="{{ item[2]}}" data-dbid_trans="{{ item[3] }}" data-station="{{ item[4] }}">
 						<img src="{{ item[0] }}" height=125px width=1200px>
 					</div>
 				{% else %}
@@ -44,6 +44,7 @@
 			<input type="submit" class="SaveButton" value="Save"></button>
 			<button id="toTop">Top</button>
 		</p>
+
 		<script>
 		
 		function toggleAccepted(e){
@@ -55,9 +56,9 @@
 			const tmp = document.querySelectorAll(".rftn-plots");
 			tmp.forEach(item => {
 				if (item.classList.contains("notAccepted")){
-					status.push([item.dataset.dbid_rad, item.dataset.dbid_trans, false, item.id])
+					status.push([item.dataset.dbid_rad, item.dataset.dbid_trans, false, item.id, item.dataset.station])
 				} else {
-					status.push([item.dataset.dbid_rad, item.dataset.dbid_trans, true, item.id])
+					status.push([item.dataset.dbid_rad, item.dataset.dbid_trans, true, item.id, item.dataset.station])
 				}
 			});
 			const messageDiv = document.getElementById("messages")
