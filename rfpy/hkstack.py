@@ -1,4 +1,3 @@
-import os
 from multiprocessing import Pool
 
 import numpy as np
@@ -160,12 +159,10 @@ class HKStack:
             time_Ps = self.hh*(etas - etap)
             time_PpPs = self.hh*(etas + etap)
             time_PpSs = self.hh*(2*etas)
-        # First had 1 + time_Ps etc but it was consistently lower answers
-        # than fortran.  Made 0 and now it's consistent.  Figure out which is
-        # correct then adjust code. and PWS code.
-            t1 = 0 + ((time_Ps - beg)/delta).astype(int)
-            t2 = 0 + ((time_PpPs - beg)/delta).astype(int)
-            t3 = 0 + ((time_PpSs - beg)/delta).astype(int)
+
+            t1 = ((time_Ps - beg)/delta).astype(int)
+            t2 = ((time_PpPs - beg)/delta).astype(int)
+            t3 = ((time_PpSs - beg)/delta).astype(int)
             rf1 = tr.data[t1] + (tr.data[(t1+1)] - tr.data[t1]) * (
                   time_Ps - beg - (t1-0) * delta)/delta
             rf2 = tr.data[t2] + (tr.data[(t2+1)] - tr.data[t2]) * (
@@ -178,11 +175,11 @@ class HKStack:
                 analytic_tr = hilbert(tr)
                 imrf1 = (np.cos(analytic_tr[t1]) + (0+1j) * np.sin(analytic_tr[t1]))+(
                     (np.cos(analytic_tr[(t1+1)]) + (0+1j)*np.sin(analytic_tr[(t1+1)])) -
-                    (np.cos(analytic_tr[t1]) + (0+1j) * np.sin(analytic_tr[t1]))) *(
+                    (np.cos(analytic_tr[t1]) + (0+1j) * np.sin(analytic_tr[t1]))) * (
                     (time_Ps-beg - (t1-0) * delta)/delta)
                 imrf2 = (np.cos(analytic_tr[t2]) + (0+1j) * np.sin(analytic_tr[t2])) + (
                     (np.cos(analytic_tr[(t2+1)]) + (0+1j) * np.sin(analytic_tr[(t2+1)])) -
-                    (np.cos(analytic_tr[t2]) + (0+1j) * np.sin(analytic_tr[t2]))) *(
+                    (np.cos(analytic_tr[t2]) + (0+1j) * np.sin(analytic_tr[t2]))) * (
                     (time_PpPs - beg - (t2-0) * delta)/delta)
                 imrf3 = (np.cos(analytic_tr[t3]) + (0+1j) * np.sin(analytic_tr[t3])) + (
                     (np.cos(analytic_tr[(t3+1)]) + (0+1j) * np.sin(analytic_tr[(t3+1)])) -
@@ -262,16 +259,10 @@ class HKStack:
             bs_depths[i] = pool_result[i][0]
 
         kavg = np.mean(bs_kappas)
-        havg = np.mean(bs_depths)
-        sumhk = np.sum((bs_depths-havg)*(bs_kappas-kavg))
-        # sumhk = np.mean((bs_depths-havg)*(bs_kappas-kavg))
-
-        # self.sigmak = np.round(np.std(bs_kappas),2)
-        # self.sigmah = np.round(np.std(bs_depths),1)
+        havg = np.mean(bs_depths)        
         self.sigmak = np.std(bs_kappas)
         self.sigmah = np.std(bs_depths)
-        # self.correl = 100.0*sumhk/(self.bs_replications-1)/self.sigmak/self.sigmah
-        self.correl = np.corrcoef(bs_depths,y=bs_kappas)[0][1]
+        self.correl = np.corrcoef(bs_depths, y=bs_kappas)[0][1]
         return self.sigmak, self.sigmah, self.correl
 
     def _covariance_ellipse(self):
@@ -280,7 +271,6 @@ class HKStack:
         y_ell = np.zeros(self.nell)
         t = np.zeros(self.nell)
         # compute tilting
-        #corr = self.correl/100.0
         corr = self.correl
         sigh = self.sigmah
         sigk = self.sigmak
@@ -392,7 +382,6 @@ class HKStack:
 
         vs = self.maxvs
         for i, tr in enumerate(self.stream):
-            print(tr)
             p = tr.stats.sac['user8']
             beg = tr.stats.sac['b']
             delta = tr.stats.sac['delta']
@@ -440,7 +429,6 @@ class HKStack:
                 if -i+29 == 9:
                     _bottom_plot_settings()
 
-        print(self.gs.get_subplot_params())
         ax = self.fig.add_subplot(self.gs[9:10, 11:12])
         _plot_legend_settings('solid', 'Ps')
         ax = self.fig.add_subplot(self.gs[8:9, 11:12])

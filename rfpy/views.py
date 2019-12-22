@@ -113,7 +113,6 @@ def doneqc():
             query_trans.accepted = False
 
     station = request.json[-1][4]
-    print(station)
     query_sta = Stations.query.filter_by(station=station).first()
     query_sta.status = "Q"
     db.session.commit()
@@ -152,7 +151,6 @@ def hkstack():
                                     Stations).join(Filters).filter(
                                     Stations.station == sta).filter(
                                     Filters.filter == filt)
-        print(sta, filt)
         rfs = [rftn.path for rftn in rf_query
                if rftn.accepted is True and rftn.path[-1] == 'r']
 
@@ -306,7 +304,6 @@ def rfplots():
         filt_query = Filters.query.all()
         plots = []
         for filt in filt_query:
-            print(filt)
             f = filt.id
             rf_query = ReceiverFunctions.query.filter_by(station=sta_id) \
                                               .filter_by(filter=f) \

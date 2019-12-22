@@ -1,10 +1,5 @@
 from setuptools import find_packages, setup
 
-#Add entry points to make script work?
-#So user can do
-# >>> rfpy init
-# >>> rfpy add-data
-# etc
 setup(
     name='rfpy',
     version='0.0.1',
