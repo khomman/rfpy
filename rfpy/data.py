@@ -61,7 +61,7 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
 
         for net in inv:
             for sta in net:
-                # p_arrival = model.get_travel_times(s ource_depth_in_km=event.orgins[0].depth)
+                # TODO: Get Arrival times and request data based on time
                 sta_lat = sta.latitude
                 sta_lon = sta.longitude
                 ev_lat = event.origins[0].latitude
@@ -73,17 +73,13 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                 if dist_degree > 30 and dist_degree < 90:
                     try:
                         st = client.get_waveforms(net.code, sta.code, "*",
-                                              "HH*", ev_time,
-                                              ev_time + 300)
-                        st.write(f'{os.path.join(data_path, "Data", origin_time)}/{net.code}_{sta.code}.mseed')
+                                                  "HH*", ev_time,
+                                                  ev_time + 300)
+                        ev_dir = os.path.join(data_path, "Data", origin_time)
+                        st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
                     except:
+                        # TODO: Catch proper exception act accordingly
                         pass
-                print(net.code, sta.code)
-                print(type(event.origins[0].time))
-                print(ev_time)
-                print(dist_degree)
-        print(event.origins[0].time)
-
 
 
 if __name__ == "__main__":
@@ -91,7 +87,7 @@ if __name__ == "__main__":
     tf = UTCDateTime("2019-12-20")
     get_stations(network="PE", starttime=ts, endtime=tf, level="station")
     get_events(starttime=ts, endtime=tf, minmagnitude=6.0)
-    #invdict = tst.get_contents()
+    # invdict = tst.get_contents()
     # for i in cat:
     #    print(i)
     get_data('Data/RFTN_Stations.xml', 'Data/RFTN_Catalog.xml')
