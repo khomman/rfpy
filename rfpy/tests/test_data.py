@@ -35,11 +35,11 @@ def test_get_events():
 def test_get_data():
     get_data('Data/RFTN_Stations.xml', 'Data/RFTN_Catalog.xml')
     assert os.path.exists('Data/2019-09-29T02:02:51')
-    assert os.path.exists('Data/2019-09-29T03:57:53')
-    assert os.path.exists('Data/2019-09-29T03:57:53/PE_PAKC.mseed')
-    st = read('Data/2019-09-29T03:57:53/PE_PAKC.mseed')
+    assert os.path.exists('Data/2019-09-29T15:57:53')
+    assert os.path.exists('Data/2019-09-29T15:57:53/PE_PAKC.mseed')
+    st = read('Data/2019-09-29T15:57:53/PE_PAKC.mseed')
     assert len(st) == 3
-    assert len(st[0]) == 30000
+    assert len(st[0]) == 40000
     assert st[0].stats.channel == 'HHE'
 
 

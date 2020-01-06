@@ -54,7 +54,7 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
         os.mkdir(os.path.join(data_path, 'Data'))
 
     for event in cat:
-        origin_time = event.origins[0].time.strftime("%Y-%m-%dT%I:%M:%S")
+        origin_time = event.origins[0].time.strftime("%Y-%m-%dT%H:%M:%S")
         if not os.path.exists(os.path.join(data_path, 'Data',
                               origin_time)):
             os.mkdir(os.path.join(data_path, 'Data', origin_time))
@@ -67,14 +67,23 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                 ev_lat = event.origins[0].latitude
                 ev_lon = event.origins[0].longitude
                 ev_time = UTCDateTime(event.origins[0].time)
+                ev_depth_km = event.origins[0].depth/1000.0
                 dist_degree = kilometer2degrees(gps2dist_azimuth(sta_lat,
                                                 sta_lon, ev_lat,
                                                 ev_lon)[0]/1000)
                 if dist_degree > 30 and dist_degree < 90:
+                    arr = model.get_travel_times(source_depth_in_km=ev_depth_km,
+                                                 distance_in_degree=dist_degree,
+                                                 phase_list=['P'])
+                    start_time = ev_time + arr[0].time - 100
+                    end_time = ev_time + arr[0].time + 300
+                    # obspy uses seconds/radian for rayp..what units do we need
+                    rayp = arr[0].ray_param
                     try:
+                        # Request data from client using 100 seconds before P
+                        # and 300 seconds after P
                         st = client.get_waveforms(net.code, sta.code, "*",
-                                                  "HH*", ev_time,
-                                                  ev_time + 300)
+                                                  "HH*", start_time, end_time)
                         ev_dir = os.path.join(data_path, "Data", origin_time)
                         st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
                     except:
