@@ -61,7 +61,6 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
 
         for net in inv:
             for sta in net:
-                # TODO: Get Arrival times and request data based on time
                 sta_lat = sta.latitude
                 sta_lon = sta.longitude
                 ev_lat = event.origins[0].latitude
@@ -77,8 +76,6 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                                                  phase_list=['P'])
                     start_time = ev_time + arr[0].time - 100
                     end_time = ev_time + arr[0].time + 300
-                    # obspy uses seconds/radian for rayp..what units do we need
-                    rayp = arr[0].ray_param
                     try:
                         # Request data from client using 100 seconds before P
                         # and 300 seconds after P
