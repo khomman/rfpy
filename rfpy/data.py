@@ -50,6 +50,18 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
     inv = read_inventory(staxml, format='STATIONXML')
     model = init_model()
 
+    if 'channel' not in kwargs:
+        channel = "HH*,BH*"
+    else:
+        channel = kwargs['channel']
+        del kwargs['channel']
+
+    if 'location' not in kwargs:
+        location = "*"
+    else:
+        location = kwargs['location']
+        del kwargs['location']
+
     if not os.path.exists(os.path.join(data_path, 'Data')):
         os.mkdir(os.path.join(data_path, 'Data'))
 
@@ -79,8 +91,9 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                     try:
                         # Request data from client using 100 seconds before P
                         # and 300 seconds after P
-                        st = client.get_waveforms(net.code, sta.code, "*",
-                                                  "HH*", start_time, end_time)
+                        st = client.get_waveforms(net.code, sta.code, location,
+                                                  channel, start_time,
+                                                  end_time, **kwargs)
                         ev_dir = os.path.join(data_path, "Data", origin_time)
                         st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
                     except:
