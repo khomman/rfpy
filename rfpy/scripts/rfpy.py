@@ -1,6 +1,9 @@
 import click
 
+from obspy import UTCDateTime
+
 from rfpy import app, db
+from rfpy.data import get_stations, get_events, get_data
 from rfpy.models import Stations, ReceiverFunctions, Filters
 from rfpy.util import read_station_file, read_rftn_file, read_rftn_directory
 
@@ -14,6 +17,37 @@ def cli():
 def db_init():
     """ Create database """
     db.create_all()
+
+
+@cli.command('download_stations')
+@click.option('-f', '--station_file', default='stas.txt')
+@click.option('-ts', '--start_time', required=True)
+@click.option('-tf', '--end_time', required=True)
+def download_stations(station_file, start_time, end_time):
+    stas = read_station_file(station_file)
+    nets = ','.join(set([s[0].split('_')[0] for s in stas]))
+    stas = ','.join(set([s[0].split('_')[1] for s in stas]))
+    ts = UTCDateTime(start_time)
+    tf = UTCDateTime(end_time)
+    get_stations(network=nets, station=stas, starttime=ts, endtime=tf,
+                 level='station')
+
+
+@cli.command('download_events')
+@click.option('-m', '--minmagnitude', default=5.5)
+@click.option('-ts', '--start_time', required=True)
+@click.option('-tf', '--end_time', required=True)
+def download_events(minmagnitude, start_time, end_time):
+    ts = UTCDateTime(start_time)
+    tf = UTCDateTime(end_time)
+    get_events(starttime=ts, endtime=tf, minmagnitude=minmagnitude)
+
+
+@cli.command('download_data')
+@click.option('-s', '--staxml', default='Data/RFTN_Stations.xml')
+@click.option('-e', '--quakeml', default='Data/RFTN_Catalog.xml')
+def download_data(staxml, quakeml):
+    get_data(staxml, quakeml)
 
 
 @cli.command('add_stations')
