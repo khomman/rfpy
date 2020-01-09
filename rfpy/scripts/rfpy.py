@@ -1,3 +1,4 @@
+import os
 import click
 
 from obspy import UTCDateTime
@@ -23,31 +24,53 @@ def db_init():
 @click.option('-f', '--station_file', default='stas.txt')
 @click.option('-ts', '--start_time', required=True)
 @click.option('-tf', '--end_time', required=True)
-def download_stations(station_file, start_time, end_time):
+@click.option('-d', '--data_dir', default=os.getcwd())
+def download_stations(station_file, start_time, end_time, data_dir):
+    """
+    Sets up the rfpy script to download a stationXML file from IRIS.
+    Stations to request are provided by the -f (--station_file) parameter.
+    The stationXML file will be downloaded to a Data folder located at the 
+    -d parameter.
+    """
     stas = read_station_file(station_file)
     nets = ','.join(set([s[0].split('_')[0] for s in stas]))
     stas = ','.join(set([s[0].split('_')[1] for s in stas]))
     ts = UTCDateTime(start_time)
     tf = UTCDateTime(end_time)
-    get_stations(network=nets, station=stas, starttime=ts, endtime=tf,
-                 level='station')
+    get_stations(data_path=data_dir, network=nets, station=stas, starttime=ts,
+                 endtime=tf, level='station')
 
 
 @cli.command('download_events')
 @click.option('-m', '--minmagnitude', default=5.5)
 @click.option('-ts', '--start_time', required=True)
 @click.option('-tf', '--end_time', required=True)
-def download_events(minmagnitude, start_time, end_time):
+@click.option('-d', '--data_dir', default=os.getcwd())
+def download_events(minmagnitude, start_time, end_time, data_dir):
+    """
+    Sets up the rfpy script to download an earthquake catalog from IRIS.
+    Earthquakes between --start_time and --end_time and with a magnitude
+    greater than minmagnitude will be included in the catalog.  The quakeML
+    file will be downloaded to a Data directory located in --data_dir.
+    """
     ts = UTCDateTime(start_time)
     tf = UTCDateTime(end_time)
-    get_events(starttime=ts, endtime=tf, minmagnitude=minmagnitude)
+    get_events(data_path=data_dir, starttime=ts, endtime=tf,
+               minmagnitude=minmagnitude)
 
 
 @cli.command('download_data')
 @click.option('-s', '--staxml', default='Data/RFTN_Stations.xml')
 @click.option('-e', '--quakeml', default='Data/RFTN_Catalog.xml')
-def download_data(staxml, quakeml):
-    get_data(staxml, quakeml)
+@click.option('-d', '--data_dir', default=os.getcwd())
+def download_data(staxml, quakeml, data_dir):
+    """
+    Sets up the rfpy script to download actual waveform data.  Uses the
+    stationXML file and the quakeML file from download_stations and
+    download_events.  Data will be downloaded to a Data directory located in
+    --data_dir.
+    """
+    get_data(staxml, quakeml, data_path=data_dir)
 
 
 @cli.command('add_stations')

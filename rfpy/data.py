@@ -24,7 +24,7 @@ def get_stations(data_path=os.getcwd(), **kwargs):
     client = init_client()
     inv = client.get_stations(**kwargs)
     if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir('Data')
+        os.mkdir(os.path.join(data_path, 'Data'))
 
     filename = os.path.join(data_path, 'Data', 'RFTN_Stations.xml')
     inv.write(filename, format='STATIONXML')
@@ -39,7 +39,7 @@ def get_events(data_path=os.getcwd(), **kwargs):
     client = init_client()
     cat = client.get_events(**kwargs)
     if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir('Data')
+        os.mkdir(os.path.join(data_path, 'Data'))
     filename = os.path.join(data_path, 'Data', 'RFTN_Catalog.xml')
     cat.write(filename, format='QUAKEML')
 
