@@ -8,6 +8,7 @@
 	<body>
 		<nav class="nav">
 			<a href="{{ url_for('index') }}">Home</a>
+			<a href="#modal" id="dl-modal-btn">Download Data</button>
 			<a href="{{ url_for('qc') }}">QC Data</a>
 			<a href="{{ url_for('hkstack') }}">HK Stack</a>
 			<a href="{{ url_for('stations')}}">Stations</a>
@@ -16,5 +17,31 @@
 		</nav>
 		{% block content %}
 		{% endblock %}
+		<div id="dl-modal" class="modal">
+		    <div class="modal-content">
+		    	<span class="closebtn">&times;</span>
+		    	{% include '_getData.html' %}
+			</div>
+		</div>
 	</body>
+	<script>
+			let modal = document.getElementById("dl-modal");
+			let btn = document.getElementById("dl-modal-btn");
+			let span = document.getElementsByClassName("closebtn")[0];
+			
+			function toggleModal() {
+				modal.classList.toggle("show-modal");
+			}
+
+			function windowOnClick(event) {
+				if (event.target === modal) {
+					toggleModal();
+				}
+			}
+
+			btn.addEventListener("click", toggleModal);
+			//modal.addEventListener("click", toggleModal);
+			span.addEventListener("click", toggleModal);
+			window.addEventListener("click", windowOnClick);
+		</script>
 </html>
