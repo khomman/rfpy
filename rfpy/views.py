@@ -1,12 +1,14 @@
 import os
 from shutil import copyfile
+from threading import Thread
 
 from flask import render_template, request, url_for, flash, redirect, jsonify
 from rfpy import app, db
 from .hkstack import HKStack
+from rfpy.data import async_get_data
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions
-from rfpy.util import rftn_stream
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot
+from rfpy.util import rftn_stream
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -368,6 +370,32 @@ def exportData():
             f.write(f'{round(i.sigmak, 2)} {i.vp}\n')
     flash(f'Data saved to {app.config["BASE_EXPORT_PATH"]}')
     return redirect(url_for('index'))
+
+
+@app.route('/getData', methods=['GET', 'POST'])
+def getData():
+    if request.method == 'POST':
+        stations = request.form['stations'].splitlines()
+        channels = request.form['channels']
+        location = request.form['location']
+        start_time = request.form['start-time']
+        end_time = request.form['end-time']
+        minmag = request.form['min-magnitude']
+        # pass info to get_data, get_stations etc
+        # run in background thread? (celery seems like overkill to have users
+        # setup)
+        nets = ','.join(set([s.split('_')[0] for s in stations]))
+        stas = ','.join(set([s.split('_')[1] for s in stations]))
+        Thread(target=async_get_data, args=(app,), kwargs={
+               'starttime': start_time,
+               'endtime': end_time,
+               'network': nets,
+               'station': stas,
+               'minmagnitude': minmag}).start()
+
+        flash(f'Your data will be downloaded')
+        return redirect(url_for('index'))
+    return render_template('getData.html')
 
 
 @app.after_request

@@ -101,6 +101,21 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                         pass
 
 
+def async_get_data(app, **kwargs):
+    with app.app_context():
+        print('called')
+        get_stations(data_path=app.config['BASE_DIR'],
+                     starttime=kwargs['starttime'], endtime=kwargs['endtime'],
+                     network=kwargs['network'], station=kwargs['station'],
+                     level="station")
+        get_events(data_path=app.config['BASE_DIR'],
+                   starttime=kwargs['starttime'], endtime=kwargs['endtime'],
+                   minmagnitude=kwargs['minmagnitude'])
+        get_data(os.path.join(app.config['BASE_DIR'],
+                 'Data/RFTN_Stations.xml'), os.path.join(
+                 app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
+                 data_path=app.config['BASE_DIR'])
+
 if __name__ == "__main__":
     ts = UTCDateTime("2016-01-01")
     tf = UTCDateTime("2019-12-20")
