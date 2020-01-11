@@ -44,11 +44,15 @@ def get_events(data_path=os.getcwd(), **kwargs):
     cat.write(filename, format='QUAKEML')
 
 
-def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
+def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
+             password=None, **kwargs):
     client = init_client()
     cat = read_events(quakeml, format='QUAKEML')
     inv = read_inventory(staxml, format='STATIONXML')
     model = init_model()
+
+    if username and password is not None:
+        client.set_credentials(username, password)
 
     if 'channel' not in kwargs:
         channel = "HH*,BH*"
@@ -103,7 +107,6 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
 
 def async_get_data(app, **kwargs):
     with app.app_context():
-        print('called')
         get_stations(data_path=app.config['BASE_DIR'],
                      starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                      network=kwargs['network'], station=kwargs['station'],
@@ -117,11 +120,11 @@ def async_get_data(app, **kwargs):
                  data_path=app.config['BASE_DIR'])
 
 if __name__ == "__main__":
-    ts = UTCDateTime("2016-01-01")
-    tf = UTCDateTime("2019-12-20")
-    get_stations(network="PE", starttime=ts, endtime=tf, level="station")
-    get_events(starttime=ts, endtime=tf, minmagnitude=6.0)
+    # ts = UTCDateTime("2016-01-01")
+    # tf = UTCDateTime("2019-12-20")
+    # get_stations(network="PE", starttime=ts, endtime=tf, level="station")
+    # get_events(starttime=ts, endtime=tf, minmagnitude=6.0)
     # invdict = tst.get_contents()
     # for i in cat:
     #    print(i)
-    get_data('Data/RFTN_Stations.xml', 'Data/RFTN_Catalog.xml')
+    # get_data('Data/RFTN_Stations.xml', 'Data/RFTN_Catalog.xml')

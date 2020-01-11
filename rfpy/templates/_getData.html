@@ -1,15 +1,19 @@
 <form method="post" action="{{ url_for('getData') }}" id="data-request-form">
     <label for="stations">Stations</label>
-    <textarea name="stations" type="text" placeholder="PE_PARS&#10TA_O56A&#10LD_ALLY"></textarea>
+    <textarea name="stations" type="text" placeholder="PE_PARS&#10TA_O56A&#10LD_ALLY" required></textarea>
     <label for="channels">Channels</label>
-    <input type="text" name="channels" value="HH*,BH*"/>
+    <input type="text" name="channels" value="HH*,BH*" required/>
     <label for="location">Location Code</label>
-    <input type="text" name="location" value="*"/>
+    <input type="text" name="location" value="*" required/>
     <label for="start-time">Start Time</label>
-    <input type="text" name="start-time" placeholder="YYYY-MM-DD"/>
+    <input type="text" name="start-time" placeholder="YYYY-MM-DD" required/>
     <label for="end-time">End Time</label>
-    <input type="text" name="end-time" placeholder="YYYY-MM-DD"/>
+    <input type="text" name="end-time" placeholder="YYYY-MM-DD" required/>
     <label for="min-magnitude">Earthquake Minimum Magnitude</label>
-    <input type="text" name="min-magnitude" value="5.5"/>
+    <input type="text" name="min-magnitude" value="5.5" required/>
+    <label for="username">FDSN Username</label>
+    <input type="text" name="username"/>
+    <label for="password">FDSN Password</label>
+    <input type="text" name="password"/>
     <input type="submit" value="Submit"/>
 </form>

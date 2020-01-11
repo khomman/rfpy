@@ -381,9 +381,15 @@ def getData():
         start_time = request.form['start-time']
         end_time = request.form['end-time']
         minmag = request.form['min-magnitude']
+        username = request.form['username']
+        password = request.form['password']
         # pass info to get_data, get_stations etc
         # run in background thread? (celery seems like overkill to have users
         # setup)
+
+        if username and password != '':
+            client.set_credentials(username, password)
+
         nets = ','.join(set([s.split('_')[0] for s in stations]))
         stas = ','.join(set([s.split('_')[1] for s in stations]))
         Thread(target=async_get_data, args=(app,), kwargs={

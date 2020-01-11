@@ -63,14 +63,20 @@ def download_events(minmagnitude, start_time, end_time, data_dir):
 @click.option('-s', '--staxml', default='Data/RFTN_Stations.xml')
 @click.option('-e', '--quakeml', default='Data/RFTN_Catalog.xml')
 @click.option('-d', '--data_dir', default=os.getcwd())
-def download_data(staxml, quakeml, data_dir):
+@click.option('-u', '--username')
+@click.option('-p', '--password')
+def download_data(staxml, quakeml, data_dir, username, password):
     """
     Sets up the rfpy script to download actual waveform data.  Uses the
     stationXML file and the quakeML file from download_stations and
     download_events.  Data will be downloaded to a Data directory located in
     --data_dir.
     """
-    get_data(staxml, quakeml, data_path=data_dir)
+    if username and password:
+        get_data(staxml, quakeml, data_path=data_dir, username=username,
+                 password=password)
+    else:
+        get_data(staxml, quakeml, data_path=data_dir)
 
 
 @cli.command('add_stations')
