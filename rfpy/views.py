@@ -386,18 +386,19 @@ def getData():
         # pass info to get_data, get_stations etc
         # run in background thread? (celery seems like overkill to have users
         # setup)
-
-        if username and password != '':
-            client.set_credentials(username, password)
-
         nets = ','.join(set([s.split('_')[0] for s in stations]))
         stas = ','.join(set([s.split('_')[1] for s in stations]))
-        Thread(target=async_get_data, args=(app,), kwargs={
-               'starttime': start_time,
-               'endtime': end_time,
-               'network': nets,
-               'station': stas,
-               'minmagnitude': minmag}).start()
+        kw = {'starttime': start_time,
+              'endtime': end_time,
+              'network': nets,
+              'station': stas,
+              'minmagnitude': minmag}
+
+        if username and password != '':
+            kw['username'] = username
+            kw['password'] = password   
+        
+        Thread(target=async_get_data, args=(app,), kwargs=kw).start()
 
         flash(f'Your data will be downloaded')
         return redirect(url_for('index'))

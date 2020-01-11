@@ -114,17 +114,16 @@ def async_get_data(app, **kwargs):
         get_events(data_path=app.config['BASE_DIR'],
                    starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                    minmagnitude=kwargs['minmagnitude'])
-        get_data(os.path.join(app.config['BASE_DIR'],
-                 'Data/RFTN_Stations.xml'), os.path.join(
-                 app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
-                 data_path=app.config['BASE_DIR'])
-
-if __name__ == "__main__":
-    # ts = UTCDateTime("2016-01-01")
-    # tf = UTCDateTime("2019-12-20")
-    # get_stations(network="PE", starttime=ts, endtime=tf, level="station")
-    # get_events(starttime=ts, endtime=tf, minmagnitude=6.0)
-    # invdict = tst.get_contents()
-    # for i in cat:
-    #    print(i)
-    # get_data('Data/RFTN_Stations.xml', 'Data/RFTN_Catalog.xml')
+        
+        if 'username' in kwargs:
+            get_data(os.path.join(app.config['BASE_DIR'],
+                     'Data/RFTN_Stations.xml'), os.path.join(
+                     app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
+                     data_path=app.config['BASE_DIR'],
+                     username=kwargs['username'],
+                     password=kwargs['password'])
+        else:
+            get_data(os.path.join(app.config['BASE_DIR'],
+                     'Data/RFTN_Stations.xml'), os.path.join(
+                     app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
+                     data_path=app.config['BASE_DIR'])
