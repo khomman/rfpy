@@ -15,6 +15,9 @@ from rfpy.util import rftn_stream
 def index():
     stations = Stations.query.order_by(Stations.station).all()
     total_sta = len(stations)
+    if total_sta == 0:
+        return render_template('index.html')
+        
     todo, hk, qc = 0, 0, 0
     for sta in stations:
         if sta.status == 'H':
