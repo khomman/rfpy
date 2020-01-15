@@ -1,18 +1,23 @@
 import os
 from shutil import copyfile
+from threading import Thread
 
 from flask import render_template, request, url_for, flash, redirect, jsonify
 from rfpy import app, db
 from .hkstack import HKStack
+from rfpy.data import _async_get_data
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions
-from rfpy.util import rftn_stream
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot
+from rfpy.util import rftn_stream
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     stations = Stations.query.order_by(Stations.station).all()
     total_sta = len(stations)
+    if total_sta == 0:
+        return render_template('index.html')
+        
     todo, hk, qc = 0, 0, 0
     for sta in stations:
         if sta.status == 'H':
@@ -368,6 +373,41 @@ def exportData():
             f.write(f'{round(i.sigmak, 2)} {i.vp}\n')
     flash(f'Data saved to {app.config["BASE_EXPORT_PATH"]}')
     return redirect(url_for('index'))
+
+
+@app.route('/getData', methods=['GET', 'POST'])
+def getData():
+    if request.method == 'POST':
+        stations = request.form['stations'].splitlines()
+        channels = request.form['channels']
+        location = request.form['location']
+        start_time = request.form['start-time']
+        end_time = request.form['end-time']
+        minmag = request.form['min-magnitude']
+        username = request.form['username']
+        password = request.form['password']
+        # pass info to get_data, get_stations etc
+        # run in background thread? (celery seems like overkill to have users
+        # setup)
+        nets = ','.join(set([s.split('_')[0] for s in stations]))
+        stas = ','.join(set([s.split('_')[1] for s in stations]))
+        kw = {'starttime': start_time,
+              'endtime': end_time,
+              'network': nets,
+              'station': stas,
+              'channels': channels,
+              'location': location,
+              'minmagnitude': minmag}
+
+        if username and password != '':
+            kw['username'] = username
+            kw['password'] = password
+
+        Thread(target=_async_get_data, args=(app,), kwargs=kw).start()
+
+        flash(f'Your data will be downloaded')
+        return redirect(url_for('index'))
+    return render_template('getData.html')
 
 
 @app.after_request

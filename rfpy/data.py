@@ -5,6 +5,9 @@ from obspy.clients.fdsn import Client
 from obspy.taup import TauPyModel
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
+from rfpy import db
+from rfpy.models import Earthquakes, RawData, Stations
+
 
 def init_client(client="IRIS"):
     client = Client(client)
@@ -16,39 +19,88 @@ def init_model(model='iasp91'):
     return model
 
 
-def get_stations(data_path=os.getcwd(), **kwargs):
+def get_stations(data_path=os.getcwd(), add_to_db=False, **kwargs):
     """
     Gets an inventory object from the client. Save the inventory as a
     STATIONXML file in the base_path location.
+    :param data_path: Top level location to store stationXML
+    :param add_to_db: Add data to the rfpy database instance
     """
     client = init_client()
     inv = client.get_stations(**kwargs)
     if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir('Data')
+        os.mkdir(os.path.join(data_path, 'Data'))
 
     filename = os.path.join(data_path, 'Data', 'RFTN_Stations.xml')
     inv.write(filename, format='STATIONXML')
+    if add_to_db:
+        sta_query = [s.station for s in Stations.query.all()]
+        for net in inv:
+            for sta in net:
+                station_name = f'{net.code}_{sta.code}'
+                if station_name not in sta_query:
+                    lat = sta.latitude
+                    lon = sta.longitude
+                    ele = sta.elevation
+                    s = Stations(station=station_name, latitude=lat,
+                                 longitude=lon, elevation=ele, status='T')
+                    db.session.add(s)
+        db.session.commit()
 
 
-def get_events(data_path=os.getcwd(), **kwargs):
+def get_events(data_path=os.getcwd(), add_to_db=False, **kwargs):
     """
     Gets a catalog object from the client.  Saves the catalog as a QUAKEML file
     in the base_path location.
+    :param data_path: Top level location to download quakeml
+    :param add_to_db: Add data to the rfpy database instance
     """
 
     client = init_client()
     cat = client.get_events(**kwargs)
     if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir('Data')
+        os.mkdir(os.path.join(data_path, 'Data'))
     filename = os.path.join(data_path, 'Data', 'RFTN_Catalog.xml')
     cat.write(filename, format='QUAKEML')
+    if add_to_db:
+        eq_query = [e.resource_id for e in Earthquakes.query.all()]
+        # check resource id against cuurrent db.  If it doesn't exist
+        # then add it to the earhtquake table
+        for ev in cat:
+            resource_id = ev.resource_id.id
+            if resource_id not in eq_query:
+                origin = ev.origins[0].time.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                lat = ev.origins[0].latitude
+                lon = ev.origins[0].longitude
+                dep = ev.origins[0].depth
+                utilized = False
+                eq = Earthquakes(resource_id=resource_id, origin_time=origin,
+                                 latitude=lat, longitude=lon, depth=dep,
+                                 utilized=utilized)
+                db.session.add(eq)
+        db.session.commit()
 
 
-def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
+def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
+             password=None, add_to_db=False, **kwargs):
+    """
+    Request event data from an obspy client.  Reads an earthquake and a station
+    file and downloads waveforms from stations that are between 30 and 90
+    degrees away from event
+    :param staxml: StationXML file location
+    :param quakeml: QuakeML file location
+    :data_path: location to store downloaded waveforms
+    :username: FDSN username for restricted data (If needed)
+    :password: FDSN password for restricted data (If needed)
+    :add_to_db: Add data to the flask database associated with the rfpy project
+    """
     client = init_client()
     cat = read_events(quakeml, format='QUAKEML')
     inv = read_inventory(staxml, format='STATIONXML')
     model = init_model()
+
+    if username and password is not None:
+        client.set_credentials(username, password)
 
     if 'channel' not in kwargs:
         channel = "HH*,BH*"
@@ -65,6 +117,14 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
     if not os.path.exists(os.path.join(data_path, 'Data')):
         os.mkdir(os.path.join(data_path, 'Data'))
 
+    if add_to_db:
+        utilized_events = [e.resource_id for e in
+                           Earthquakes.query.filter_by(utilized=True)]
+        sta_dict = {}
+        query = Stations.query.all()
+        for i in query:
+            sta_dict[i.station] = i.id
+
     for event in cat:
         origin_time = event.origins[0].time.strftime("%Y-%m-%dT%H:%M:%S")
         if not os.path.exists(os.path.join(data_path, 'Data',
@@ -78,13 +138,13 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                 ev_lat = event.origins[0].latitude
                 ev_lon = event.origins[0].longitude
                 ev_time = UTCDateTime(event.origins[0].time)
-                ev_depth_km = event.origins[0].depth/1000.0
-                dist_degree = kilometer2degrees(gps2dist_azimuth(sta_lat,
-                                                sta_lon, ev_lat,
-                                                ev_lon)[0]/1000)
-                if dist_degree > 30 and dist_degree < 90:
-                    arr = model.get_travel_times(source_depth_in_km=ev_depth_km,
-                                                 distance_in_degree=dist_degree,
+                ev_dep_km = event.origins[0].depth/1000.0
+                dist_deg = kilometer2degrees(gps2dist_azimuth(sta_lat,
+                                             sta_lon, ev_lat,
+                                             ev_lon)[0]/1000)
+                if dist_deg > 30 and dist_deg < 90:
+                    arr = model.get_travel_times(source_depth_in_km=ev_dep_km,
+                                                 distance_in_degree=dist_deg,
                                                  phase_list=['P'])
                     start_time = ev_time + arr[0].time - 100
                     end_time = ev_time + arr[0].time + 300
@@ -96,17 +156,49 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), **kwargs):
                                                   end_time, **kwargs)
                         ev_dir = os.path.join(data_path, "Data", origin_time)
                         st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
+                        if add_to_db:
+                            sta_id = sta_dict[f'{net.code}_{sta.code}']
+                            dat = RawData(sta_id=sta_id,
+                                          path=f'{ev_dir}/{net.code}_'
+                                               f'{sta.code}.mseed',
+                                               new_data=True)
+                            # Check if event is currently marked as used.
+                            # If not change the utilized col in Earthquakes
+                            ev_id = event.resource_id.id
+                            if ev_id not in utilized_events:
+                                eq = Earthquakes.query.\
+                                     filter_by(resource_id=ev_id).first()
+                                eq.utilized = True
+                            db.session.add(dat)
+                            db.session.commit()
                     except:
                         # TODO: Catch proper exception act accordingly
                         pass
 
 
-if __name__ == "__main__":
-    ts = UTCDateTime("2016-01-01")
-    tf = UTCDateTime("2019-12-20")
-    get_stations(network="PE", starttime=ts, endtime=tf, level="station")
-    get_events(starttime=ts, endtime=tf, minmagnitude=6.0)
-    # invdict = tst.get_contents()
-    # for i in cat:
-    #    print(i)
-    get_data('Data/RFTN_Stations.xml', 'Data/RFTN_Catalog.xml')
+def _async_get_data(app, **kwargs):
+    """
+    Internal helper function for flask app to install data asynchronusly to not
+    block other web functionality
+    """
+    with app.app_context():
+        get_stations(data_path=app.config['BASE_DIR'],
+                     starttime=kwargs['starttime'], endtime=kwargs['endtime'],
+                     network=kwargs['network'], station=kwargs['station'],
+                     level="station", add_to_db=True)
+        get_events(data_path=app.config['BASE_DIR'],
+                   starttime=kwargs['starttime'], endtime=kwargs['endtime'],
+                   minmagnitude=kwargs['minmagnitude'], add_to_db=True)
+
+        if 'username' in kwargs:
+            get_data(os.path.join(app.config['BASE_DIR'],
+                     'Data/RFTN_Stations.xml'), os.path.join(
+                     app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
+                     data_path=app.config['BASE_DIR'],
+                     username=kwargs['username'],
+                     password=kwargs['password'], add_to_db=True)
+        else:
+            get_data(os.path.join(app.config['BASE_DIR'],
+                     'Data/RFTN_Stations.xml'), os.path.join(
+                     app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
+                     data_path=app.config['BASE_DIR'], add_to_db=True)

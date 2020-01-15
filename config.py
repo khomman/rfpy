@@ -20,3 +20,4 @@ class Config(object):
 
     BASE_PLOT_PATH = f"{os.path.join(base_dir, 'plots/')}"
     BASE_EXPORT_PATH = f"{os.path.join(base_dir, 'exports/')}"
+    BASE_DIR = base_dir

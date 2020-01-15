@@ -10,6 +10,7 @@
 				</div>
 			{% endif %}
         {% endwith %}
+{% if status %}
 <div class="progress-container">
 <div class="progress-bars">
     <div id="todo">
@@ -35,6 +36,8 @@
     </div>
 </div>
 </div>
+{% endif %}
+{% if stations %}
 <div class="home-sta-table-container">
 <div class="home-sta-table">
     <table>
@@ -53,4 +56,5 @@
     </table>
 </div>
 </div>
+{% endif %}
 {% endblock %}
