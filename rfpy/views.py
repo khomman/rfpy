@@ -5,7 +5,7 @@ from threading import Thread
 from flask import render_template, request, url_for, flash, redirect, jsonify
 from rfpy import app, db
 from .hkstack import HKStack
-from rfpy.data import async_get_data
+from rfpy.data import _async_get_data
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot
 from rfpy.util import rftn_stream
@@ -392,13 +392,15 @@ def getData():
               'endtime': end_time,
               'network': nets,
               'station': stas,
+              'channels': channels,
+              'location': location,
               'minmagnitude': minmag}
 
         if username and password != '':
             kw['username'] = username
-            kw['password'] = password   
-        
-        Thread(target=async_get_data, args=(app,), kwargs=kw).start()
+            kw['password'] = password
+
+        Thread(target=_async_get_data, args=(app,), kwargs=kw).start()
 
         flash(f'Your data will be downloaded')
         return redirect(url_for('index'))

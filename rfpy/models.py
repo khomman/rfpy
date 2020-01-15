@@ -15,6 +15,7 @@ class Stations(db.Model):
     receiver_functions = db.relationship('ReceiverFunctions',
                                          backref='station_receiver_functions',
                                          lazy='dynamic')
+    data = db.relationship('RawData', backref='station_data', lazy='dynamic')
     hks = db.relationship('HKResults', backref='hk_station', lazy='dynamic')
 
     def __repr__(self):
@@ -27,6 +28,45 @@ class Stations(db.Model):
                 'status': self.status}
 
 
+class Earthquakes(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    depth = db.Column(db.Float)
+
+    def __repr__(self):
+        return f'<EQ: {self.id}, Lat: {self.latitude}, Lon: {self.longitude}'\
+                f'Depth (m): {self.depth}>'
+
+
+class Status(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    station_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
+    filt_id = db.Column(db.Integer, db.ForeignKey('filters.id'))
+    status = db.Column(db.String(2))
+
+    station = db.relationship('Stations', backref='station_status',
+                              uselist=False)
+    filt = db.relationship('Filters', backref='filter_status',
+                           uselist=False)
+
+    def __repr__(self):
+        return f'<Status {self.id}: {self.status}>'
+
+
+class RawData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sta_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
+    path = db.Column(db.String(255), index=True)
+    new_data = db.Column(db.Boolean)
+
+    station = db.relationship('Stations', backref='station_raw_data',
+                              uselist=False)
+
+    def __repr__(self):
+        return f'<Data: {self.id}, Station: {self.station}>'
+
+
 class Filters(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filter = db.Column(db.Float)
@@ -34,8 +74,7 @@ class Filters(db.Model):
     receiver_functions = db.relationship('ReceiverFunctions',
                                          backref='filter_receiver_functions',
                                          lazy='dynamic')
-    hks = db.relationship('HKResults', backref='hk_filter',
-                               lazy='dynamic')
+    hks = db.relationship('HKResults', backref='hk_filter', lazy='dynamic')
 
     def __repr__(self):
         return f'<Filter Center: {self.id}, {self.filter}'

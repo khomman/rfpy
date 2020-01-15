@@ -29,7 +29,7 @@ def download_stations(station_file, start_time, end_time, data_dir):
     """
     Sets up the rfpy script to download a stationXML file from IRIS.
     Stations to request are provided by the -f (--station_file) parameter.
-    The stationXML file will be downloaded to a Data folder located at the 
+    The stationXML file will be downloaded to a Data folder located at the
     -d parameter.
     """
     stas = read_station_file(station_file)
