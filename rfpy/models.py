@@ -30,9 +30,12 @@ class Stations(db.Model):
 
 class Earthquakes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    resource_id = db.Column(db.String(99))
+    origin_time = db.Column(db.String(15))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     depth = db.Column(db.Float)
+    utilized = db.Column(db.Boolean)
 
     def __repr__(self):
         return f'<EQ: {self.id}, Lat: {self.latitude}, Lon: {self.longitude}'\
