@@ -265,13 +265,15 @@ def base_map(projection='local', center_lat=0, center_lon=0, extent=None,
             central_longitude=center_lon))
         if extent:
             ax.set_extent(extent)
+    elif projection == 'AzimuthalEquidistant':
+        ax = plt.axes(projection=ccrs.AzimuthalEquidistant(
+                      central_longitude=center_lon,
+                      central_latitude=center_lat))
     else:
         print('Projection not supported')
     ax.coastlines()
     ax.add_feature(cfeature.LAND)
-    ax.add_feature(cfeature.OCEAN)
     ax.add_feature(cfeature.BORDERS, linestyle='-')
-    ax.add_feature(cfeature.LAKES, alpha=0.5)
     return ax
 
 
@@ -340,6 +342,19 @@ def station_map(sta_lats, sta_lons, sta_names=None, projection='local',
             ax.text(sta_lons[i]-0.2, sta_lats[i]+0.1, name,
                     transform=data_crs)
 
+    if filename:
+        plt.savefig(filename)
+        plt.close()
+        return
+    return ax
+
+
+def eq_map(eq_lats, eq_lons, center_lat, center_lon, filename=None):
+    data_crs = ccrs.Geodetic()
+    ax = base_map(projection='AzimuthalEquidistant', center_lat=center_lat,
+                  center_lon=center_lon)
+    ax.scatter(eq_lons, eq_lats, transform=data_crs, color='red')
+    ax.set_global()
     if filename:
         plt.savefig(filename)
         plt.close()
