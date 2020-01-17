@@ -6,8 +6,10 @@ from flask import render_template, request, url_for, flash, redirect, jsonify
 from rfpy import app, db
 from .hkstack import HKStack
 from rfpy.data import _async_get_data
-from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions
-from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot
+from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions,\
+                        Earthquakes
+from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot,\
+                          eq_map
 from rfpy.util import rftn_stream
 
 
@@ -17,7 +19,7 @@ def index():
     total_sta = len(stations)
     if total_sta == 0:
         return render_template('index.html')
-        
+
     todo, hk, qc = 0, 0, 0
     for sta in stations:
         if sta.status == 'H':
@@ -294,6 +296,25 @@ def hkmap():
 
     return render_template('plots.html', plot=plots,
                            format='hk')
+
+
+@app.route('/eqmap')
+def eqmap():
+    """ View to plot earthquakes used in study """
+    eqs = Earthquakes.query.filter_by(utilized=True)
+    sta_coords = [[s.latitude, s.longitude] for s in Stations.query.all()]
+    min_lat = min([i[0] for i in sta_coords])
+    max_lat = max([i[0] for i in sta_coords])
+    min_lon = min([i[1] for i in sta_coords])
+    max_lon = max([i[1] for i in sta_coords])
+    center_lat = (max_lat - min_lat)/2 + min_lat
+    center_lon = (max_lon - min_lon)/2 + min_lon
+    eq_lat = [eq.latitude for eq in eqs]
+    eq_lon = [eq.longitude for eq in eqs]
+    eq_plot = 'static/eq_map.svg'
+    eq_map(eq_lat, eq_lon, center_lat, center_lon,
+           filename=os.path.join(app.root_path, eq_plot))
+    return render_template('plots.html', plot=eq_plot, format='eq')
 
 
 @app.route('/rfplots', methods=['GET', 'POST'])

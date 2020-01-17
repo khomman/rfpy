@@ -12,6 +12,10 @@
                     <img src="{{ p[1] }}"/>
                 {% endfor %}
             </div>
+        {% elif format == "eq" %}
+            <div class="plot-types">
+                <img src="{{ plot }}"/>
+            </div>
         {% else %}
             <div class="plot-types">
                 <a href="{{ url_for('stationmap') }}"><img src="static/sta_thumb.png"/></a>
