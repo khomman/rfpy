@@ -6,7 +6,7 @@ from obspy.taup import TauPyModel
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 from rfpy import db
-from rfpy.models import Earthquakes, RawData, Stations
+from rfpy.models import Earthquakes, RawData, Stations, Arrivals
 
 
 def init_client(client="IRIS"):
@@ -100,7 +100,11 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
     model = init_model()
 
     if username and password is not None:
-        client.set_credentials(username, password)
+        # set_credentials doesn't appear to be working..
+        # try to set the user and password instance variables directly
+        # client.set_credentials(username, password)
+        client.user = username
+        client.password = password
 
     if 'channel' not in kwargs:
         channel = "HH*,BH*"
@@ -158,27 +162,34 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                         st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
                         if add_to_db:
                             sta_id = sta_dict[f'{net.code}_{sta.code}']
+                            ev_id = event.resource_id.id
+                            eq_query = Earthquakes.query.\
+                                filter_by(resource_id=ev_id).first()
+                            eq_query_id = eq_query.id
                             dat = RawData(sta_id=sta_id,
                                           path=f'{ev_dir}/{net.code}_'
                                                f'{sta.code}.mseed',
                                                new_data=True)
+                            arrival = Arrivals(arr_type='P',
+                                               time=str(ev_time+arr[0].time),
+                                               station_id=sta_id,
+                                               eq_id=eq_query_id)
                             # Check if event is currently marked as used.
                             # If not change the utilized col in Earthquakes
-                            ev_id = event.resource_id.id
                             if ev_id not in utilized_events:
-                                eq = Earthquakes.query.\
-                                     filter_by(resource_id=ev_id).first()
-                                eq.utilized = True
+                                eq_query.utilized = True
+
                             db.session.add(dat)
+                            db.session.add(arrival)
                             db.session.commit()
-                    except:
+                    except Exception:
                         # TODO: Catch proper exception act accordingly
                         pass
 
 
 def _async_get_data(app, **kwargs):
     """
-    Internal helper function for flask app to install data asynchronusly to not
+    Internal helper function for flask app to download data asynchronusly to not
     block other web functionality
     """
     with app.app_context():
