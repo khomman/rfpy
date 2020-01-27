@@ -37,6 +37,10 @@ class Arrivals(db.Model):
     earthquake = db.relationship('Earthquakes', backref='earthquake_arr')
     station = db.relationship('Stations', backref='station_arr')
 
+    def as_dict(self):
+        return {'ID': self.id, 'type': self.arr_type, 'time': self.time,
+                'station': self.station_id, 'earthquake': self.eq_id}
+
     def __repr__(self):
         return f'<Arrival: Type {self.arr_type}, Station {self.station_id}'\
                f'Earthquake {self.eq_id}>'
@@ -50,6 +54,11 @@ class Earthquakes(db.Model):
     longitude = db.Column(db.Float)
     depth = db.Column(db.Float)
     utilized = db.Column(db.Boolean)
+
+    def as_dict(self):
+        return {'ID': self.id, 'time': self.origin_time,
+                'latitude': self.latitude, 'longitude': self.longitude,
+                'depth': self.depth, 'used': self.utilized}
 
     def __repr__(self):
         return f'<EQ: {self.id}, Lat: {self.latitude}, Lon: {self.longitude}'\

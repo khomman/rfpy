@@ -7,7 +7,7 @@ from rfpy import app, db
 from .hkstack import HKStack
 from rfpy.data import _async_get_data
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions,\
-                        Earthquakes
+                        Earthquakes, Arrivals
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot,\
                           eq_map
 from rfpy.util import rftn_stream
@@ -351,7 +351,8 @@ def rfplots():
 @app.route('/dbAdmin', methods=['GET', 'POST'])
 def dbAdmin():
     tables = [['HKResults', 'hk'], ['Filters', 'filter'],
-              ['Receiver Functions', 'rftn'], ['Stations', 'station']]
+              ['Receiver Functions', 'rftn'], ['Stations', 'station'],
+              ['Earthquakes', 'earthquakes'], ['Arrivals', 'arrivals']]
     return render_template('dbAdmin.html', tables=tables)
 
 
@@ -366,6 +367,10 @@ def getTables():
         data = Filters.query.all()
     elif table == 'rftn':
         data = ReceiverFunctions.query.all()
+    elif table == 'earthquakes':
+        data = Earthquakes.query.all()
+    elif table == 'arrivals':
+        data = Arrivals.query.all()
     else:
         flash('That table is not available')
         return redirect(url_for('dbAdmin'))
