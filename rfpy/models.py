@@ -22,9 +22,9 @@ class Stations(db.Model):
                 f'{self.longitude}, {self.elevation}, {self.status}>'
 
     def as_dict(self):
-        return {'ID': self.id, 'name': self.station, 'latitude': self.latitude,
-                'longitude': self.longitude, 'elevation': self.elevation,
-                'status': self.status}
+        return {'ID': self.id, 'Station': self.station,
+                'Latitude': self.latitude, 'Longitude': self.longitude,
+                'Elevation': self.elevation, 'Status': self.status}
 
 
 class Arrivals(db.Model):
@@ -38,8 +38,9 @@ class Arrivals(db.Model):
     station = db.relationship('Stations', backref='station_arr')
 
     def as_dict(self):
-        return {'ID': self.id, 'type': self.arr_type, 'time': self.time,
-                'station': self.station.station, 'earthquake': self.eq_id}
+        return {'ID': self.id, 'Type': self.arr_type,
+                'Arrival Time': self.time, 'Station': self.station.station,
+                'Earthquake': self.eq_id}
 
     def __repr__(self):
         return f'<Arrival: Type {self.arr_type}, Station {self.station_id}'\
@@ -56,9 +57,9 @@ class Earthquakes(db.Model):
     utilized = db.Column(db.Boolean)
 
     def as_dict(self):
-        return {'ID': self.id, 'time': self.origin_time,
-                'latitude': self.latitude, 'longitude': self.longitude,
-                'depth': self.depth, 'used': self.utilized}
+        return {'ID': self.id, 'Time': self.origin_time,
+                'Latitude': self.latitude, 'Longitude': self.longitude,
+                'Depth': round(self.depth/1000, 2), 'Used': self.utilized}
 
     def __repr__(self):
         return f'<EQ: {self.id}, Lat: {self.latitude}, Lon: {self.longitude}'\
@@ -88,6 +89,10 @@ class RawData(db.Model):
 
     station = db.relationship('Stations', backref='station_raw_data',
                               uselist=False)
+
+    def as_dict(self):
+        return {'ID': self.id, 'Station': self.station.station,
+                'Path': self.path, 'New': self.new_data}
 
     def __repr__(self):
         return f'<Data: {self.id}, Station: {self.station}>'
@@ -125,10 +130,10 @@ class HKResults(db.Model):
         return f'<Station: {self.station}, H: {self.h}, K: {self.k}>'
 
     def as_dict(self):
-        return {'ID': self.id, 'station': self.hk_station.station,
-                'filter': self.hk_filter.filter, 'depth': self.h,
-                'sigmah': round(self.sigmah, 1), 'kappa': self.k,
-                'sigmak': round(self.sigmak, 2), 'vp': self.vp}
+        return {'ID': self.id, 'Station': self.hk_station.station,
+                'Filter': self.hk_filter.filter, 'Depth': self.h,
+                'Sigmah': round(self.sigmah, 1), 'Kappa': self.k,
+                'Sigmak': round(self.sigmak, 2), 'Vp': self.vp}
 
 
 class ReceiverFunctions(db.Model):
@@ -145,7 +150,7 @@ class ReceiverFunctions(db.Model):
 
     def as_dict(self):
         return {'ID': self.id,
-                'station': self.station_receiver_functions.station,
-                'filter': self.filter_receiver_functions.filter,
-                'path': self.path, 'newData': self.new_receiver_function,
-                'accepted': self.accepted}
+                'Station': self.station_receiver_functions.station,
+                'Filter': self.filter_receiver_functions.filter,
+                'Path': self.path, 'NewData': self.new_receiver_function,
+                'Accepted': self.accepted}
