@@ -39,7 +39,7 @@ class Arrivals(db.Model):
 
     def as_dict(self):
         return {'ID': self.id, 'type': self.arr_type, 'time': self.time,
-                'station': self.station_id, 'earthquake': self.eq_id}
+                'station': self.station.station, 'earthquake': self.eq_id}
 
     def __repr__(self):
         return f'<Arrival: Type {self.arr_type}, Station {self.station_id}'\

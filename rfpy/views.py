@@ -383,6 +383,8 @@ def getTables():
 def exportData():
     stas = Stations.query.all()
     hk = HKResults.query.all()
+    eq = Earthquakes.query.all()
+    arr = Arrivals.query.all()
 
     with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Stations.txt', 'w') as f:
         f.write('Station Latitude Longitude Elevation\n')
@@ -397,6 +399,18 @@ def exportData():
             f.write(f'{i.hk_station.longitude} {i.hk_station.elevation} ')
             f.write(f'{i.hk_filter.filter} {i.h} {round(i.sigmah, 1)} {i.k} ')
             f.write(f'{round(i.sigmak, 2)} {i.vp}\n')
+
+    with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Eqs.txt', 'w') as f:
+        f.write('Time Latitude Longitude Depth Used\n')
+        for e in eq:
+            f.write(f'{e.origin_time} {e.latitude} {e.longitude} {e.depth} ')
+            f.write(f'{e.utilized}\n')
+
+    with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Arrivals.txt', 'w') as f:
+        f.write('Type Time Station Earthquake\n')
+        for a in arr:
+            f.write(f'{a.arr_type} {a.time} {a.station.station} {a.eq_id}\n')
+
     flash(f'Data saved to {app.config["BASE_EXPORT_PATH"]}')
     return redirect(url_for('index'))
 
