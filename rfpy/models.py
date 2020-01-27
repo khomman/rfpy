@@ -1,4 +1,3 @@
-from datetime import datetime
 from rfpy import db
 
 
@@ -26,6 +25,21 @@ class Stations(db.Model):
         return {'ID': self.id, 'name': self.station, 'latitude': self.latitude,
                 'longitude': self.longitude, 'elevation': self.elevation,
                 'status': self.status}
+
+
+class Arrivals(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    arr_type = db.Column(db.String(2))
+    time = db.Column(db.String(20))
+    station_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
+    eq_id = db.Column(db.Integer, db.ForeignKey('earthquakes.id'))
+
+    earthquake = db.relationship('Earthquakes', backref='earthquake_arr')
+    station = db.relationship('Stations', backref='station_arr')
+
+    def __repr__(self):
+        return f'<Arrival: Type {self.arr_type}, Station {self.station_id}'\
+               f'Earthquake {self.eq_id}>'
 
 
 class Earthquakes(db.Model):
