@@ -2,8 +2,8 @@ const dbTableNames = document.querySelectorAll(".tables");
 const resultsTable = document.querySelector("#resultsTable");
 
 async function getTableData(url) {
-    const response = await fetch(url)
-    return response.json()
+    const response = await fetch(url);
+    return response.json();
 }
 
 function generateTableHead(table, data) {

@@ -7,7 +7,7 @@ from rfpy import app, db
 from .hkstack import HKStack
 from rfpy.data import _async_get_data
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions,\
-                        Earthquakes
+                        Earthquakes, Arrivals, RawData
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot,\
                           eq_map
 from rfpy.util import rftn_stream
@@ -351,7 +351,9 @@ def rfplots():
 @app.route('/dbAdmin', methods=['GET', 'POST'])
 def dbAdmin():
     tables = [['HKResults', 'hk'], ['Filters', 'filter'],
-              ['Receiver Functions', 'rftn'], ['Stations', 'station']]
+              ['Receiver Functions', 'rftn'], ['Stations', 'station'],
+              ['Earthquakes', 'earthquakes'], ['Arrivals', 'arrivals'],
+              ['Raw Data', 'rawdata']]
     return render_template('dbAdmin.html', tables=tables)
 
 
@@ -366,6 +368,12 @@ def getTables():
         data = Filters.query.all()
     elif table == 'rftn':
         data = ReceiverFunctions.query.all()
+    elif table == 'earthquakes':
+        data = Earthquakes.query.all()
+    elif table == 'arrivals':
+        data = Arrivals.query.all()
+    elif table == 'rawdata':
+        data = RawData.query.all()
     else:
         flash('That table is not available')
         return redirect(url_for('dbAdmin'))
@@ -378,6 +386,8 @@ def getTables():
 def exportData():
     stas = Stations.query.all()
     hk = HKResults.query.all()
+    eq = Earthquakes.query.all()
+    arr = Arrivals.query.all()
 
     with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Stations.txt', 'w') as f:
         f.write('Station Latitude Longitude Elevation\n')
@@ -392,6 +402,18 @@ def exportData():
             f.write(f'{i.hk_station.longitude} {i.hk_station.elevation} ')
             f.write(f'{i.hk_filter.filter} {i.h} {round(i.sigmah, 1)} {i.k} ')
             f.write(f'{round(i.sigmak, 2)} {i.vp}\n')
+
+    with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Eqs.txt', 'w') as f:
+        f.write('Time Latitude Longitude Depth Used\n')
+        for e in eq:
+            f.write(f'{e.origin_time} {e.latitude} {e.longitude} {e.depth} ')
+            f.write(f'{e.utilized}\n')
+
+    with open(f'{app.config["BASE_EXPORT_PATH"]}RFTN_Arrivals.txt', 'w') as f:
+        f.write('Type Time Station Earthquake\n')
+        for a in arr:
+            f.write(f'{a.arr_type} {a.time} {a.station.station} {a.eq_id}\n')
+
     flash(f'Data saved to {app.config["BASE_EXPORT_PATH"]}')
     return redirect(url_for('index'))
 
