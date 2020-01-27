@@ -5,7 +5,6 @@ import numpy as np
 from obspy.signal.util import next_pow_2
 from math import pi
 from scipy.fftpack import fft, ifft
-import matplotlib.pyplot as plt
 
 
 def gaussFilter(dt, nft, f0):

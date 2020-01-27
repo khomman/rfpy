@@ -45,6 +45,15 @@ def set_stats(st, inv, ev):
 
 
 def _rel_trim(st, before, after, reference='P'):
+    """
+    Internal trim function. Uses obspy trim function to cut waveforms
+    relative to the arrival provided by reference
+    :param st: Obspy stream
+    :param before: Seconds before reference time to start trim
+    :param after: Seconds after reference time to end trim
+    :param reference: Header value containing arrival time to trim around.
+        header is in trace.stats.rf
+    """
     for tr in st:
         try:
             start_cut = tr.stats.rf[reference] - before
@@ -62,9 +71,18 @@ def _rel_trim(st, before, after, reference='P'):
             continue
 
         tr.trim(starttime=start_cut, endtime=end_cut, nearest_sample=False)
+    return
 
 
 def _add_arrivals(st, use_db=True, model='iasp91'):
+    """
+    Internal function to calculate or retrieve the theoretical arrival times.
+    Will grab from the Arrivals table in the database by defualt or will
+    calculate arrival times using obspy.taup and the given model
+    :param st: Obspy stream object
+    :param use_db: Use the rfpy database to query the arrival table
+    :param model: Model to use to calculate arrival time if use_db is False
+    """
     sta = f'{st[0].stats.network}_{st[0].stats.station}'
     # Query Earthquakes and use backrefs to get arrivals and station info for
     # that event.  Add to trace.stats.rf dict once a matching station arrival

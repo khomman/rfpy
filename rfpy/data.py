@@ -189,8 +189,8 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
 
 def _async_get_data(app, **kwargs):
     """
-    Internal helper function for flask app to download data asynchronusly to not
-    block other web functionality
+    Internal helper function for flask app to download data asynchronusly to
+    not block other web functionality
     """
     with app.app_context():
         get_stations(data_path=app.config['BASE_DIR'],
