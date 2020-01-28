@@ -1,0 +1,19 @@
+<form method="post" action="{{ url_for('calc_rf') }}" id="calc-rf-form">
+    <label for="stations">Stations</label>
+    <textarea name="stations" type="text" placeholder="PE_PARS&#10;TA_O56A&#10;* (will use all stations)" required>*</textarea>
+    <label for="gaussians">Gaussian Widths</label>
+    <textarea name="gaussians" type="text" required>1.0&#10;2.5&#10;5.0</textarea>
+    <label for="rms-cut">RMS cutoff</label>
+    <input type="text" name="rms-cut" value="0.15" required/>
+    <label for="trim-start">Trim start</label>
+    <input type="text" name="trim-start" value="10" required/>
+    <label for="end-time">Trim end</label>
+    <input type="text" name="trim-end" value="100" required/>
+    <label for="prefilt-low">PreFilt Low f</label>
+    <input type="text" name="prefilt-low" value="0.05" required/>
+    <label for="prefilt-high">PreFilt high f</label>
+    <input type="text" name="prefilt-high" value="8.0" required/> 
+    <label for="dt">PreFilt Low f</label>
+    <input type="text" name="dt" value="0.1" required/> 
+    <input type="submit" value="Submit"/>
+</form>

@@ -84,11 +84,13 @@ class Status(db.Model):
 class RawData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sta_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
+    earthquake_id = db.Column(db.Integer, db.ForeignKey('earthquakes.id'))
     path = db.Column(db.String(255), index=True)
     new_data = db.Column(db.Boolean)
 
     station = db.relationship('Stations', backref='station_raw_data',
                               uselist=False)
+    earthquake = db.relationship('Earthquakes', backref='earthquake_raw_data')
 
     def as_dict(self):
         return {'ID': self.id, 'Station': self.station.station,

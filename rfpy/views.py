@@ -10,6 +10,7 @@ from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions,\
                         Earthquakes, Arrivals, RawData
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot,\
                           eq_map
+from rfpy.rftn import _async_rf_calc
 from rfpy.util import rftn_stream
 
 
@@ -451,6 +452,32 @@ def getData():
         flash(f'Your data will be downloaded')
         return redirect(url_for('index'))
     return render_template('getData.html')
+
+
+@app.route('/calc_rf', methods=['POST'])
+def calc_rf():
+    # stations = request.form['station'].splitlines()
+    # sta_ids = Stations.query.filter(Stations.station.in_(stations))
+    # data_query = RawData.query.filter(RawData.sta_id.in_(sta_ids))
+    data = [(d.path, d.earthquake_id) for d in
+            RawData.query.filter_by(new_data=True).all()]
+    gaussians = [float(g) for g in request.form['gaussians'].splitlines()]
+    rms_cut = request.form['rms-cut']
+    trim_start = request.form['trim-start']
+    trim_end = request.form['trim-end']
+    prefilt_low = request.form['prefilt-low']
+    prefilt_high = request.form['prefilt-high']
+    dt = request.form['dt']
+    kw = {'data': data,
+          'gauss': gaussians,
+          'trim': (int(trim_start), int(trim_end)),
+          'prefilt': (float(prefilt_low), float(prefilt_high)),
+          'dt': float(dt),
+          'rms_cut': float(rms_cut)}
+    Thread(target=_async_rf_calc, args=(app,), kwargs=kw).start()
+    # spin up more processes for more compute power during deconvolution?
+    flash('Calculating Receiver Functions')
+    return redirect(url_for('index'))
 
 
 @app.after_request
