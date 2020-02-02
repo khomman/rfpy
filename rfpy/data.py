@@ -10,11 +10,13 @@ from rfpy.models import Earthquakes, RawData, Stations, Arrivals
 
 
 def init_client(client="IRIS"):
+    """ Initilize an Obspy Client object """
     client = Client(client)
     return client
 
 
 def init_model(model='iasp91'):
+    """ Initialize a TauPyModel object """
     model = TauPyModel(model=model)
     return model
 
@@ -22,6 +24,25 @@ def init_model(model='iasp91'):
 def check_data_directory(data_path):
     if not os.path.exists(os.path.join(data_path, 'Data')):
         os.mkdir(os.path.join(data_path, 'Data'))
+
+
+def _check_st_len(st):
+    """
+    Verifies a stream is only 3 channels.  If stream is longer than 3 channels
+    this function trims the stream to only include the first 3.  If channels
+    contain 1 or 2 instead of N or S it will rotate to ZNE coordinates
+    """
+    if len(st) > 3:
+        newst = st[:3]
+    else:
+        newst = st
+    return newst
+
+
+def _check_ZNE(st, inv):
+    chans = [tr.stats.channel[-1] for tr in st]
+    if '1' or '2' in chans:
+        st.rotate('->ZNE', inventory=inv)
 
 
 def get_stations(data_path=os.getcwd(), add_to_db=False, **kwargs):
@@ -169,6 +190,8 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                                                   end_time, **kwargs)
                         ev_dir = os.path.join(data_path, "Data", origin_time,
                                               'RAW')
+                        st = _check_st_len(st)
+                        _check_ZNE(st, inv)
                         st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
                         if add_to_db:
                             sta_id = sta_dict[f'{net.code}_{sta.code}']
@@ -207,7 +230,7 @@ def _async_get_data(app, **kwargs):
         get_stations(data_path=app.config['BASE_DIR'],
                      starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                      network=kwargs['network'], station=kwargs['station'],
-                     level="station", add_to_db=True)
+                     level="channel", add_to_db=True)
         get_events(data_path=app.config['BASE_DIR'],
                    starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                    minmagnitude=kwargs['minmagnitude'], add_to_db=True)

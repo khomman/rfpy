@@ -8,6 +8,35 @@ from rfpy import db
 from rfpy.decov import decovit
 from rfpy.models import Earthquakes, ReceiverFunctions, Filters, Stations
 
+HEADERS_MAP = {'ev_lat': 'evla', 'ev_lon': 'evlo',
+               'ev_dep_m': 'evdp', 'sta_lat': 'stla',
+               'sta_lon': 'stlo', 'baz': 'baz', 'gcarc': 'gcarc',
+               'ev_resource_id': 'USER0', 'P': 'USER1', 'trim_start': 'b'}
+
+
+def _SAC2UTC(stats, head):
+    from obspy.io.sac.util import get_sac_reftime
+    return get_sac_reftime(stats.sac) + stats[head]
+
+
+def _UTC2SAC(stats, head):
+    from obspy.io.sac.util import get_sac_reftime
+    return stats[head] - get_sac_reftime(stats.sac)
+
+
+def _rf2sac_headers(tr, headers):
+    if 'sac' not in tr.stats:
+        tr.stats.sac = {}
+    for key, value in headers.items():
+        tr.stats.sac[value] = tr.stats.rf[key]
+
+
+def _sac2rf_headers(tr, headers):
+    if 'rf' not in tr.stats:
+        tr.stats.rf = {}
+    for key, value in headers.items():
+        tr.stats.rf[key] = tr.stats.sac[value]
+
 
 def set_stats(st, inv, ev):
     """
@@ -149,8 +178,10 @@ def rf_calc(st, prefilt=(0.05, 8), dt=0.1, gauss=[1.0], trim=(10, 100),
         trans_rf_rms = trans_rf_data[1][-1]
         rad_rf.stats.rf['gaussian'] = str(g)
         rad_rf.stats.rf['rms'] = rad_rf_rms
+        rad_rf.stats.rf['trim_start'] = -trim[0]
         trans_rf.stats.rf['gaussian'] = str(g)
         trans_rf.stats.rf['rms'] = trans_rf_rms
+        trans_rf.stats.rf['trim_start'] = -trim[0]
 
         rfs.append((rad_rf, trans_rf, rad_rf_rms, g))
 
@@ -191,6 +222,8 @@ def rfpy_calc_rf(st, data_path=os.getcwd(), rms_cutoff=0.15, **kwargs):
         rms = rf[2]
         rad_rf = rf[0]
         trans_rf = rf[1]
+        _rf2sac_headers(rad_rf, HEADERS_MAP)
+        _rf2sac_headers(trans_rf, HEADERS_MAP)
         rad_rf.write(f'{save_path}/{rad_name}', format="SAC")
         trans_rf.write(f'{save_path}/{trans_name}', format="SAC")
         initial_accept = True if rms < rms_cutoff else False
