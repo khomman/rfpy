@@ -359,7 +359,7 @@ html, body {
     background-color: var(--stations-table-even);
 }
 
-/* download data modal */
+/* modal */
 .modal {
     position: fixed;
     z-index: 1;
@@ -381,6 +381,7 @@ html, body {
     width: 50%;
 }
 
+/* Download data modal */
 #data-request-form {
     display: flex;
     flex-direction: column;
@@ -416,4 +417,22 @@ html, body {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+/* RF modal */
+#calc-rf-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#calc-rf-form input {
+    margin: 0 .5em .5em .5em;
+}
+
+#calc-rf-form textarea {
+    margin: 0 .5em .5em .5em;
+}
+
+#calc-rf-form label {
+    margin: .5em .5em 0 .5em;
 }

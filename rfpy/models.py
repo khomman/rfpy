@@ -33,6 +33,9 @@ class Arrivals(db.Model):
     time = db.Column(db.String(20))
     station_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
     eq_id = db.Column(db.Integer, db.ForeignKey('earthquakes.id'))
+    rayp = db.Column(db.Float)
+    inc_angle = db.Column(db.Float)
+    take_angle = db.Column(db.Float)
 
     earthquake = db.relationship('Earthquakes', backref='earthquake_arr')
     station = db.relationship('Stations', backref='station_arr')
@@ -49,7 +52,7 @@ class Arrivals(db.Model):
 
 class Earthquakes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    resource_id = db.Column(db.String(99))
+    resource_id = db.Column(db.String(99), unique=True)
     origin_time = db.Column(db.String(15))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
@@ -84,11 +87,13 @@ class Status(db.Model):
 class RawData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sta_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
-    path = db.Column(db.String(255), index=True)
+    earthquake_id = db.Column(db.Integer, db.ForeignKey('earthquakes.id'))
+    path = db.Column(db.String(255), index=True, unique=True)
     new_data = db.Column(db.Boolean)
 
     station = db.relationship('Stations', backref='station_raw_data',
                               uselist=False)
+    earthquake = db.relationship('Earthquakes', backref='earthquake_raw_data')
 
     def as_dict(self):
         return {'ID': self.id, 'Station': self.station.station,
@@ -100,7 +105,7 @@ class RawData(db.Model):
 
 class Filters(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    filter = db.Column(db.Float)
+    filter = db.Column(db.Float, unique=True)
 
     receiver_functions = db.relationship('ReceiverFunctions',
                                          backref='filter_receiver_functions',
@@ -140,7 +145,7 @@ class ReceiverFunctions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     station = db.Column(db.Integer, db.ForeignKey('stations.id'))
     filter = db.Column(db.Integer, db.ForeignKey('filters.id'))
-    path = db.Column(db.String(255), index=True)
+    path = db.Column(db.String(255), index=True, unique=True)
     new_receiver_function = db.Column(db.Boolean)
     accepted = db.Column(db.Boolean)
 

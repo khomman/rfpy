@@ -10,13 +10,39 @@ from rfpy.models import Earthquakes, RawData, Stations, Arrivals
 
 
 def init_client(client="IRIS"):
+    """ Initilize an Obspy Client object """
     client = Client(client)
     return client
 
 
 def init_model(model='iasp91'):
+    """ Initialize a TauPyModel object """
     model = TauPyModel(model=model)
     return model
+
+
+def check_data_directory(data_path):
+    if not os.path.exists(os.path.join(data_path, 'Data')):
+        os.mkdir(os.path.join(data_path, 'Data'))
+
+
+def _check_st_len(st):
+    """
+    Verifies a stream is only 3 channels.  If stream is longer than 3 channels
+    this function trims the stream to only include the first 3.  If channels
+    contain 1 or 2 instead of N or S it will rotate to ZNE coordinates
+    """
+    if len(st) > 3:
+        newst = st[:3]
+    else:
+        newst = st
+    return newst
+
+
+def _check_ZNE(st, inv):
+    chans = [tr.stats.channel[-1] for tr in st]
+    if '1' or '2' in chans:
+        st.rotate('->ZNE', inventory=inv)
 
 
 def get_stations(data_path=os.getcwd(), add_to_db=False, **kwargs):
@@ -28,9 +54,7 @@ def get_stations(data_path=os.getcwd(), add_to_db=False, **kwargs):
     """
     client = init_client()
     inv = client.get_stations(**kwargs)
-    if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir(os.path.join(data_path, 'Data'))
-
+    check_data_directory(data_path)
     filename = os.path.join(data_path, 'Data', 'RFTN_Stations.xml')
     inv.write(filename, format='STATIONXML')
     if add_to_db:
@@ -58,8 +82,7 @@ def get_events(data_path=os.getcwd(), add_to_db=False, **kwargs):
 
     client = init_client()
     cat = client.get_events(**kwargs)
-    if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir(os.path.join(data_path, 'Data'))
+    check_data_directory(data_path)
     filename = os.path.join(data_path, 'Data', 'RFTN_Catalog.xml')
     cat.write(filename, format='QUAKEML')
     if add_to_db:
@@ -98,6 +121,9 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
     cat = read_events(quakeml, format='QUAKEML')
     inv = read_inventory(staxml, format='STATIONXML')
     model = init_model()
+    check_data_directory(data_path)
+    cat_size = len(cat)
+    cnt = 0
 
     if username and password is not None:
         # set_credentials doesn't appear to be working..
@@ -118,9 +144,6 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
         location = kwargs['location']
         del kwargs['location']
 
-    if not os.path.exists(os.path.join(data_path, 'Data')):
-        os.mkdir(os.path.join(data_path, 'Data'))
-
     if add_to_db:
         utilized_events = [e.resource_id for e in
                            Earthquakes.query.filter_by(utilized=True)]
@@ -130,10 +153,17 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
             sta_dict[i.station] = i.id
 
     for event in cat:
+        # temporary status update to be polled by frontend
+        cnt += 1
+        with open(os.path.join(data_path, 'Data', '.stat.txt'), 'w') as f:
+            f.write(f'{int(100*cnt/cat_size)}')
+
         origin_time = event.origins[0].time.strftime("%Y-%m-%dT%H:%M:%S")
         if not os.path.exists(os.path.join(data_path, 'Data',
                               origin_time)):
             os.mkdir(os.path.join(data_path, 'Data', origin_time))
+            os.mkdir(os.path.join(data_path, 'Data', origin_time, 'RAW'))
+            os.mkdir(os.path.join(data_path, 'Data', origin_time, 'RF'))
 
         for net in inv:
             for sta in net:
@@ -152,13 +182,19 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                                                  phase_list=['P'])
                     start_time = ev_time + arr[0].time - 100
                     end_time = ev_time + arr[0].time + 300
+                    rayp = arr[0].ray_param/6371.0
+                    take_angle = arr[0].takeoff_angle
+                    inc_angle = arr[0].incident_angle
                     try:
                         # Request data from client using 100 seconds before P
                         # and 300 seconds after P
                         st = client.get_waveforms(net.code, sta.code, location,
                                                   channel, start_time,
                                                   end_time, **kwargs)
-                        ev_dir = os.path.join(data_path, "Data", origin_time)
+                        ev_dir = os.path.join(data_path, "Data", origin_time,
+                                              'RAW')
+                        st = _check_st_len(st)
+                        _check_ZNE(st, inv)
                         st.write(f'{ev_dir}/{net.code}_{sta.code}.mseed')
                         if add_to_db:
                             sta_id = sta_dict[f'{net.code}_{sta.code}']
@@ -167,13 +203,16 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                                 filter_by(resource_id=ev_id).first()
                             eq_query_id = eq_query.id
                             dat = RawData(sta_id=sta_id,
+                                          earthquake_id=eq_query_id,
                                           path=f'{ev_dir}/{net.code}_'
                                                f'{sta.code}.mseed',
                                                new_data=True)
                             arrival = Arrivals(arr_type='P',
                                                time=str(ev_time+arr[0].time),
                                                station_id=sta_id,
-                                               eq_id=eq_query_id)
+                                               eq_id=eq_query_id, rayp=rayp,
+                                               inc_angle=inc_angle,
+                                               take_angle=take_angle)
                             # Check if event is currently marked as used.
                             # If not change the utilized col in Earthquakes
                             if ev_id not in utilized_events:
@@ -196,7 +235,7 @@ def _async_get_data(app, **kwargs):
         get_stations(data_path=app.config['BASE_DIR'],
                      starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                      network=kwargs['network'], station=kwargs['station'],
-                     level="station", add_to_db=True)
+                     level="channel", add_to_db=True)
         get_events(data_path=app.config['BASE_DIR'],
                    starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                    minmagnitude=kwargs['minmagnitude'], add_to_db=True)
