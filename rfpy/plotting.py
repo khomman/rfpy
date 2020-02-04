@@ -224,9 +224,11 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, title=None,
     radial_st = Stream()
     trans_st = Stream()
     for tr in st:
-        if tr.stats.channel.lower() == 'radial':
+        if (tr.stats.channel.lower() == 'radial' or
+           tr.stats.channel.lower()[-1] == 'r'):
             radial_st += tr
-        elif tr.stats.channel.lower() == 'transv':
+        elif (tr.stats.channel.lower() == 'transv' or
+              tr.stats.channel.lower()[-1] == 't'):
             trans_st += tr
         else:
             print(f'{tr.id} Not a valid channel')

@@ -97,6 +97,7 @@ def qc():
             dbid_rad = accepted[name_rad][1]
             dbid_trans = accepted[name_trans][1]
             rftn_results.append([i, val, dbid_rad, dbid_trans, sta])
+            rftn_results.sort(key=lambda x: x[1], reverse=True)
         return render_template('rftnqc.html', stas=stations, filters=filters,
                                eqrresult=rftn_results)
     return render_template('rftnqc.html', stas=stations, filters=filters)

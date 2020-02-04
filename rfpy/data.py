@@ -182,6 +182,9 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                                                  phase_list=['P'])
                     start_time = ev_time + arr[0].time - 100
                     end_time = ev_time + arr[0].time + 300
+                    rayp = arr[0].ray_param/6371.0
+                    take_angle = arr[0].takeoff_angle
+                    inc_angle = arr[0].incident_angle
                     try:
                         # Request data from client using 100 seconds before P
                         # and 300 seconds after P
@@ -207,7 +210,9 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                             arrival = Arrivals(arr_type='P',
                                                time=str(ev_time+arr[0].time),
                                                station_id=sta_id,
-                                               eq_id=eq_query_id)
+                                               eq_id=eq_query_id, rayp=rayp,
+                                               inc_angle=inc_angle,
+                                               take_angle=take_angle)
                             # Check if event is currently marked as used.
                             # If not change the utilized col in Earthquakes
                             if ev_id not in utilized_events:

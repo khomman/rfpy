@@ -8,10 +8,25 @@ from rfpy import db
 from rfpy.decov import decovit
 from rfpy.models import Earthquakes, ReceiverFunctions, Filters, Stations
 
+# Header map from obspy tr.stats['rf'] to sac.  rf stats that are not
+# inherently in sac files are placed in 'user?' blocks. User blocks are chosen
+# to be consistent with the output from Ammon's iterdecon.f
+# user0: Gaussian Width
+# user1: event id (only the integer portion)
+# user2: incident angle
+# user3: takeoff angle
+# user4: ray_paramerer
+# user5: rms
+
+# NEED TO MAP EV_RESOURCE_ID TO A SINGLE NUMBER AS SAC CANNOT STORE ######
+# STRINGS.  USE DB TABLE ID? OR HOW TO MAKE IT UNIQUE WITHOUT DB    ######
+# 'ev_resource_id': 'user1',
 HEADERS_MAP = {'ev_lat': 'evla', 'ev_lon': 'evlo',
                'ev_dep_m': 'evdp', 'sta_lat': 'stla',
                'sta_lon': 'stlo', 'baz': 'baz', 'gcarc': 'gcarc',
-               'ev_resource_id': 'USER0', 'P': 'USER1', 'trim_start': 'b'}
+               'P': 'user0', 'trim_start': 'b',
+               'ray_param': 'user8', 'incident_angle': 'user2',
+               'takeoff_angle': 'user3', 'gaussian': 'user0', 'rms': 'user5'}
 
 
 def _SAC2UTC(stats, head):
@@ -40,7 +55,7 @@ def _sac2rf_headers(tr, headers):
 
 def set_stats(st, inv, ev):
     """
-    Sets need information for rftn calculation in the stats dictionary for
+    Sets needed information for rftn calculation in the stats dictionary for
     each trace in the Stream.  This information consists of back_azimuth,
     distance, origin time, P wave arrival.
     :param st: Obspy Stream object containing one station 3 channels
@@ -125,6 +140,9 @@ def _add_arrivals(st, use_db=True, model='iasp91'):
         for i in eq_db.earthquake_arr:
             if i.station.station == sta:
                 arr = UTCDateTime(i.time)
+                rayp = i.rayp
+                inc_angle = i.inc_angle
+                take_angle = i.take_angle
                 break
     else:
         if not isinstance(model, TauPyModel):
@@ -139,6 +157,9 @@ def _add_arrivals(st, use_db=True, model='iasp91'):
 
     for tr in st:
         tr.stats.rf['P'] = arr
+        tr.stats.rf['ray_param'] = rayp
+        tr.stats.rf['incident_angle'] = inc_angle
+        tr.stats.rf['takeoff_angle'] = take_angle
     return
 
 
