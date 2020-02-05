@@ -7,7 +7,7 @@ from rfpy import app, db
 from .hkstack import HKStack
 from rfpy.data import _async_get_data
 from rfpy.models import Stations, Filters, HKResults, ReceiverFunctions,\
-                        Earthquakes, Arrivals, RawData
+                        Earthquakes, Arrivals, RawData, ProgressStatus
 from rfpy.plotting import rftn_plot, station_map, hk_map, sta_total_rf_plot,\
                           eq_map
 from rfpy.rftn import _async_rf_calc
@@ -18,10 +18,30 @@ from rfpy.util import rftn_stream
 def index():
     stations = Stations.query.order_by(Stations.station).all()
     total_sta = len(stations)
+    status = ProgressStatus.query
+    dl_query = status.filter_by(name='download').first()
+    rf_query = status.filter_by(name='rf').first()
+
+    if dl_query is not None:
+        dl_stat = dl_query.progress
+    else:
+        dl_stat = 0
+
+    if rf_query is not None:
+        rf_stat = rf_query.progress
+    else:
+        rf_stat = 0
+
     if total_sta == 0:
         return render_template('index.html')
 
     todo, hk, qc = 0, 0, 0
+
+    dl_status_file = os.path.join(app.config['BASE_DIR'], 'Data/.stat.txt')
+    if os.path.exists(dl_status_file):
+        with open(dl_status_file) as f:
+            dl_stat = f.read()
+
     for sta in stations:
         if sta.status == 'H':
             hk += 1
@@ -33,7 +53,8 @@ def index():
     status = {'total': total_sta, 'todo': todo, 'hk': hk, 'qc': qc,
               'qcpercent': int(100*(qc/total_sta)),
               'todopercent': int(100*(todo/total_sta)),
-              'hkpercent': int(100*(hk/total_sta))}
+              'hkpercent': int(100*(hk/total_sta)),
+              'dlpercent': dl_stat, 'rfpercent': rf_stat}
     return render_template('index.html', status=status, stations=stations)
 
 
@@ -479,6 +500,14 @@ def calc_rf():
     # spin up more processes for more compute power during deconvolution?
     flash('Calculating Receiver Functions')
     return redirect(url_for('index'))
+
+
+@app.route('/poll_status')
+def poll_status():
+    data = ProgressStatus.query.all()
+    data_list = [{d.name: d.progress} for d in data]
+    print(data_list)
+    return jsonify(data_list)
 
 
 @app.after_request

@@ -20,6 +20,20 @@
             </div>
         </div>
     </div>
+    <div id="dl">
+        <div class="base-progress">
+            <div id="dl-progress" class="progress" style="width:{{ status.dlpercent }}%">
+                <span id="dl-span">Download:{{ status.dlpercent }}%</span>
+            </div>
+        </div>
+    </div>
+    <div id="rf">
+        <div class="base-progress">
+            <div id="rf-progress" class="progress" style="width:{{ status.rfpercent }}%">
+                <span id="rf-span">RF:{{ status.rfpercent }}%</span>
+            </div>
+        </div>
+    </div>
     <div id="qc">
         <div class="base-progress">
             <div class="progress" style="width:{{ status.qcpercent }}%">
@@ -56,5 +70,6 @@
     </table>
 </div>
 </div>
+<script src="{{ url_for('static', filename='statusPolling.js') }}"></script>
 {% endif %}
 {% endblock %}

@@ -6,7 +6,8 @@ from obspy.taup import TauPyModel
 from obspy.geodetics import gps2dist_azimuth, kilometer2degrees
 
 from rfpy import db
-from rfpy.models import Earthquakes, RawData, Stations, Arrivals
+from rfpy.models import Earthquakes, RawData, Stations, Arrivals, \
+                        ProgressStatus
 
 
 def init_client(client="IRIS"):
@@ -155,8 +156,19 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
     for event in cat:
         # temporary status update to be polled by frontend
         cnt += 1
-        with open(os.path.join(data_path, 'Data', '.stat.txt'), 'w') as f:
-            f.write(f'{int(100*cnt/cat_size)}')
+        dl_perc = int(100*cnt/cat_size)
+        if add_to_db:
+            dl_progress = ProgressStatus.query.filter_by(
+                                               name='download').first()
+            if dl_progress:
+                dl_progress.progress = dl_perc
+            else:
+                dl_progress_q = ProgressStatus(name='download',
+                                               progress=dl_perc)
+
+            if dl_progress_q:
+                db.session.add(dl_progress_q)
+            db.session.commit()
 
         origin_time = event.origins[0].time.strftime("%Y-%m-%dT%H:%M:%S")
         if not os.path.exists(os.path.join(data_path, 'Data',
