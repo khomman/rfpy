@@ -6,7 +6,8 @@ from obspy.taup import TauPyModel
 
 from rfpy import db
 from rfpy.decov import decovit
-from rfpy.models import Earthquakes, ReceiverFunctions, Filters, Stations
+from rfpy.models import Earthquakes, ReceiverFunctions, Filters, Stations,\
+                        ProgressStatus
 
 # Header map from obspy tr.stats['rf'] to sac.  rf stats that are not
 # inherently in sac files are placed in 'user?' blocks. User blocks are chosen
@@ -271,7 +272,8 @@ def _async_rf_calc(app, **kwargs):
     cat_path = os.path.join(app.config["BASE_DIR"], 'Data/RFTN_Catalog.xml')
     inv = read_inventory(inv_path)
     cat = read_events(cat_path)
-    for d in data:
+    for i, d in enumerate(data):
+        status = int(100*(i+1)/len(data))
         st = read(d[0])
         eq_id = d[1]
         eq_time = Earthquakes.query.filter_by(id=eq_id).first().origin_time
@@ -281,3 +283,10 @@ def _async_rf_calc(app, **kwargs):
         ev = cat.filter(f"time >= {t1}", f"time <= {t2}")[0]
         set_stats(st, inv, ev)
         rfpy_calc_rf(st, rms_cutoff=rms_cut, **kwargs)
+        stat_query = ProgressStatus.query.filter_by(name='rf').first()
+        if stat_query is not None:
+            stat_query.progress = status
+        else:
+            stat = ProgressStatus(name='rf', progress=status)
+            db.session.add(stat)
+        db.session.commit()

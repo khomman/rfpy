@@ -69,6 +69,15 @@ class Earthquakes(db.Model):
                 f'Depth (m): {self.depth}>'
 
 
+class ProgressStatus(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))
+    progress = db.Column(db.Integer)
+
+    def __repr__(self):
+        return f'<Progess {self.name}: {self.progress}%'
+
+
 class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     station_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
