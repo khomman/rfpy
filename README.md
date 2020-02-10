@@ -38,8 +38,17 @@ rfpy database.
 ```bash
 rfpy db_init
 ```
-You can now start the rfpy flask app and open a web browser to the [rfpy page](127.0.0.1:5000)
+You can now start the rfpy flask app and open a web browser to the [rfpy page](http://127.0.0.1:5000)
 ```bash
 rfpy start
 ```
+
+## Usage
+The first run of rfpy will not contain any data.  Click the Download Data tab
+and fill out the form
+![dlform](img/DownloadData.png)
+
+Once the data has downloaded you can calculate receiver functions by clicking the Calculate RF tab and
+editing the form
+![rfform](img/CalcRFForm.png)
 
