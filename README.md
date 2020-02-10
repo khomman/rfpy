@@ -16,6 +16,7 @@ conda create --name rfpy python=3.7
 conda activate rfpy
 conda config  --add channels conda-forge
 conda install obspy
+conda install cartopy
 ```
 **3.** RFPY can be downloaded via [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 ```bash
