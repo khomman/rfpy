@@ -4,6 +4,9 @@ instance/
 .webassets-cache
 docs/_build/
 rfpy/static/*.svg
+*.svg
 .vscode/
 rfpy/.vscode/settings.json
 sampledata/
+rfpy/tests/Data
+rfpy/tests/*.svg

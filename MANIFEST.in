@@ -1,3 +1,5 @@
+include config.py
 graft rfpy/templates
 graft rfpy/static
+graft rfpy/scripts
 global-exclude *.pyc

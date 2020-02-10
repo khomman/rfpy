@@ -9,6 +9,7 @@ It is recommended to create a virtual environment via venv or conda. Installatio
 via Ananconda is highlighted below.
 
 **1.** Install the Python 3 version of [Anaconda](https://www.anaconda.com/distribution/) for your operating system
+
 **2.** Create a conda environment containing Obspy
 ```bash
 conda create --name rfpy python=3.7
@@ -35,7 +36,7 @@ python setup.py install
 To start using RFPY navigate to a directory you would like to work in and initialize the 
 rfpy database.
 ```bash
-rfpy init_db
+rfpy db_init
 ```
 You can now start the rfpy flask app and open a web browser to the [rfpy page](127.0.0.1:5000)
 ```bash
