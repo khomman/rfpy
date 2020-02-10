@@ -46,9 +46,13 @@ rfpy start
 ## Usage
 The first run of rfpy will not contain any data.  Click the Download Data tab
 and fill out the form
-![dlform](img/DownloadData.png)
+![dlform](img/DownloadDataForm.png)
 
 Once the data has downloaded you can calculate receiver functions by clicking the Calculate RF tab and
 editing the form
 ![rfform](img/CalcRFForm.png)
+
+After calculating the receiver functions you can perform quality control and the hk stack method on the data.
+
+Station, earthquake, and receiver function plots are available at the plots tab.
 
