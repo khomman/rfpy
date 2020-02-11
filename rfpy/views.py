@@ -268,6 +268,9 @@ def plots():
 def stationmap():
     """ View for stationmap plot """
     stations = Stations.query.all()
+    if len(stations) == 0:
+        flash('No station data in database...Please download or add data')
+        return redirect(url_for('index'))
     sta_lats = []
     sta_lons = []
     sta_names = []
@@ -293,8 +296,7 @@ def hkmap():
     for filt in filt_query:
         f = filt.id
         sta_query = HKResults.query.filter_by(filter=f).all()
-        if not sta_query:
-            continue
+
         sta_lats = []
         sta_lons = []
         sta_names = []
@@ -326,6 +328,10 @@ def eqmap():
     """ View to plot earthquakes used in study """
     eqs = Earthquakes.query.filter_by(utilized=True)
     sta_coords = [[s.latitude, s.longitude] for s in Stations.query.all()]
+    if len(sta_coords) == 0 or len(eqs.all()) == 0:
+        flash(f"No stations or earthquakes in database...Please download "
+              f"or add data")
+        return redirect(url_for('index'))
     min_lat = min([i[0] for i in sta_coords])
     max_lat = max([i[0] for i in sta_coords])
     min_lon = min([i[1] for i in sta_coords])
@@ -472,7 +478,9 @@ def getData():
         Thread(target=_async_get_data, args=(app,), kwargs=kw).start()
 
         flash(f'Your data will be downloaded')
-        return redirect(url_for('index'))
+        return (f'<p>Loading...</p><script> let timer=setTimeout(()=>'
+                f'{{window.location="{url_for("index")}"}}, 4000)</script>')
+        # return redirect(url_for('index'))
     return render_template('getData.html')
 
 

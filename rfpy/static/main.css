@@ -87,6 +87,7 @@ html, body {
 
 .home-sta-table td {
     text-align: center;
+    padding: 3px;
 }
 .home-sta-table tr:nth-child(odd){
     background-color: var(--background-white);
@@ -237,6 +238,7 @@ html, body {
 
 #stations td {
     text-align: center;
+    padding: 3px;
 }
 #stations tr:nth-child(odd){
     background-color: var(--background-white);
@@ -351,6 +353,8 @@ html, body {
 
 #resultsTable td {
     text-align: center;
+    padding-left: .8em;
+    padding-right: .8em
 }
 #resultsTable tbody tr:nth-child(odd){
     background-color: var(--background-white);
