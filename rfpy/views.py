@@ -472,7 +472,9 @@ def getData():
         Thread(target=_async_get_data, args=(app,), kwargs=kw).start()
 
         flash(f'Your data will be downloaded')
-        return redirect(url_for('index'))
+        return (f'<p>Loading...</p><script> let timer=setTimeout(()=>'
+                f'{{window.location="{url_for("index")}"}}, 4000)</script>')
+        # return redirect(url_for('index'))
     return render_template('getData.html')
 
 
