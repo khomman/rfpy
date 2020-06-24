@@ -28,6 +28,9 @@
 			<p><input type="submit" class="SaveButton" value="Save"></button></p>
 			<div id="messages" class="messages hidden-message"></div>
 			{% if result != None %}
+			<div class="rf-title">
+				<h2>Radial</h2><h2>Transverse</h2>
+			</div>
 			{% for item in eqrresult %}
 				{% if item[1] == True %}
 					<div class="rftn-plots" id="{{ item[0] }}" data-dbid_rad="{{ item[2]}}" data-dbid_trans="{{ item[3] }}" data-station="{{ item[4] }}">

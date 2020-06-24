@@ -296,7 +296,8 @@ def hkmap():
     for filt in filt_query:
         f = filt.id
         sta_query = HKResults.query.filter_by(filter=f).all()
-
+        if len(sta_query) == 0:
+            continue
         sta_lats = []
         sta_lons = []
         sta_names = []
