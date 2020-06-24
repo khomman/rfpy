@@ -67,10 +67,8 @@ def rftn_plot(eqr_st, eqt_st, start_second=-1, end_second=10,
             ax2.spines['top'].set_visible(False)
             ax2.xaxis.set_ticks_position('bottom')
             ax2.yaxis.set_ticks_position('none')
-            if i == 0:
-                ax1.set_title('EQR')
-                ax2.set_title('EQT')
             plotfile = os.path.join(base_path, 'static', f'{trace}.svg')
+            plt.subplots_adjust(bottom=0.3)
             plt.savefig(plotfile)
             plt.close()
             plotfiles.append(os.path.join('static', f'{trace}.svg'))
@@ -221,6 +219,11 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, title=None,
     :param plot_end: Seconds from starttime to end plot
     :param filename: Name for saved file
     """
+    # Normalize based on
+    # http://eqseis.geosc.psu.edu/cammon/HTML/RftnDocs/seq01.html
+    # for common Gaussians
+    # norm_factors = {'0.5': 0.29, '1.0': 0.57, '1.5': 0.85, '2.5': 1.42,
+    #                '2.5': 1.42, '3.0': 1.7, '5.0': 2.83, '10.0': 5.68}
     radial_st = Stream()
     trans_st = Stream()
     for tr in st:
@@ -232,7 +235,6 @@ def sta_total_rf_plot(st, plot_start=-2, plot_end=30, title=None,
             trans_st += tr
         else:
             print(f'{tr.id} Not a valid channel')
-
     fig, ax = plt.subplots(2, 2, figsize=(8, 11))
     rayp_plot(ax[0][0], radial_st, scaling=0.005, plot_start=plot_start,
               plot_end=plot_end)

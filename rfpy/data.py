@@ -41,6 +41,11 @@ def _check_st_len(st):
 
 
 def _check_ZNE(st, inv):
+    """
+        Forces streams to be in ZNE channel configuration.  If station uses
+        Z12 naming then the station is rotated to ZNE according to the
+        provided inventory object.
+    """
     chans = [tr.stats.channel[-1] for tr in st]
     if '1' or '2' in chans:
         st.rotate('->ZNE', inventory=inv)
@@ -89,7 +94,7 @@ def get_events(data_path=os.getcwd(), add_to_db=False, **kwargs):
     if add_to_db:
         eq_query = [e.resource_id for e in Earthquakes.query.all()]
         # check resource id against cuurrent db.  If it doesn't exist
-        # then add it to the earhtquake table
+        # then add it to the earthquake table
         for ev in cat:
             resource_id = ev.resource_id.id
             if resource_id not in eq_query:
@@ -126,7 +131,7 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
     cat_size = len(cat)
     cnt = 0
 
-    if username and password is not None:
+    if username and password:  # is not None:
         # set_credentials doesn't appear to be working..
         # try to set the user and password instance variables directly
         # client.set_credentials(username, password)
@@ -157,6 +162,7 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
         # temporary status update to be polled by frontend
         cnt += 1
         dl_perc = int(100*cnt/cat_size)
+        dl_progress_q = False
         if add_to_db:
             dl_progress = ProgressStatus.query.filter_by(
                                                name='download').first()

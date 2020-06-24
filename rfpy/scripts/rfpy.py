@@ -83,15 +83,19 @@ def download_data(staxml, quakeml, data_dir, username, password):
 @click.option('-f', '--station_file', default='stas.txt')
 def add_stations(station_file):
     """ Add stations, dependent on station file, to database """
+    cnt = 0
     stas = read_station_file(station_file)
+    existing_stas = [s.station for s in Stations.query.all()]
     for sta in stas:
-        s = Stations(station=sta[0], latitude=sta[1], longitude=sta[2],
-                     elevation=sta[3], status='T')
-        db.session.add(s)
+        if sta[0] not in existing_stas:
+            s = Stations(station=sta[0], latitude=sta[1], longitude=sta[2],
+                         elevation=sta[3], status='T')
+            db.session.add(s)
+            cnt += 1
     # Fails if there are duplicates.  Need to catch the error and pass it on or
     # query db first, and only add to session if station doesn't exist
     db.session.commit()
-    print(f'Added {len(stas)} stations to the database')
+    print(f'Added {cnt} stations to the database')
 
 
 @cli.command('add_rftns')

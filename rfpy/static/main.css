@@ -120,6 +120,13 @@ html, body {
     opacity: 0.3;
 }
 
+.rf-title {
+    display: flex;
+}
+
+.rf-title h2 {
+    margin: auto;
+}
 /* HKStack */
 .hkContainer {
     display: flex;
