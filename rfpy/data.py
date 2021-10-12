@@ -10,9 +10,13 @@ from rfpy.models import Earthquakes, RawData, Stations, Arrivals, \
                         ProgressStatus
 
 
-def init_client(client="IRIS"):
+def init_client(client="IRIS", username=None, password=None):
     """ Initilize an Obspy Client object """
-    client = Client(client)
+    if username and password:
+        client = Client(client, user=username, password=password)
+    else:
+        client = Client(client)
+
     return client
 
 
@@ -58,7 +62,14 @@ def get_stations(data_path=os.getcwd(), add_to_db=False, **kwargs):
     :param data_path: Top level location to store stationXML
     :param add_to_db: Add data to the rfpy database instance
     """
-    client = init_client()
+    if 'username' and 'password' in kwargs:
+        client = init_client(username=kwargs['username'],
+                             password=kwargs['password'])
+        del kwargs['username']
+        del kwargs['password']
+    else:
+        client = init_client()
+
     inv = client.get_stations(**kwargs)
     check_data_directory(data_path)
     filename = os.path.join(data_path, 'Data', 'RFTN_Stations.xml')
@@ -110,8 +121,8 @@ def get_events(data_path=os.getcwd(), add_to_db=False, **kwargs):
         db.session.commit()
 
 
-def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
-             password=None, add_to_db=False, **kwargs):
+def get_data(staxml, quakeml, data_path=os.getcwd(), add_to_db=False,
+             **kwargs):
     """
     Request event data from an obspy client.  Reads an earthquake and a station
     file and downloads waveforms from stations that are between 30 and 90
@@ -123,20 +134,20 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
     :password: FDSN password for restricted data (If needed)
     :add_to_db: Add data to the flask database associated with the rfpy project
     """
-    client = init_client()
+    if 'username' and 'password' in kwargs:
+        client = init_client(username=kwargs['username'],
+                             password=kwargs['password'])
+        del kwargs['username']
+        del kwargs['password']
+    else:
+        client = init_client()
+
     cat = read_events(quakeml, format='QUAKEML')
     inv = read_inventory(staxml, format='STATIONXML')
     model = init_model()
     check_data_directory(data_path)
     cat_size = len(cat)
     cnt = 0
-
-    if username and password:  # is not None:
-        # set_credentials doesn't appear to be working..
-        # try to set the user and password instance variables directly
-        # client.set_credentials(username, password)
-        client.user = username
-        client.password = password
 
     if 'channel' not in kwargs:
         channel = "HH*,BH*"
@@ -239,7 +250,7 @@ def get_data(staxml, quakeml, data_path=os.getcwd(), username=None,
                             db.session.add(dat)
                             db.session.add(arrival)
                             db.session.commit()
-                    except Exception:
+                    except Exception as e:
                         # TODO: Catch proper exception act accordingly
                         pass
 
@@ -250,15 +261,17 @@ def _async_get_data(app, **kwargs):
     not block other web functionality
     """
     with app.app_context():
-        get_stations(data_path=app.config['BASE_DIR'],
-                     starttime=kwargs['starttime'], endtime=kwargs['endtime'],
-                     network=kwargs['network'], station=kwargs['station'],
-                     level="channel", add_to_db=True)
         get_events(data_path=app.config['BASE_DIR'],
                    starttime=kwargs['starttime'], endtime=kwargs['endtime'],
                    minmagnitude=kwargs['minmagnitude'], add_to_db=True)
 
         if 'username' in kwargs:
+            get_stations(data_path=app.config['BASE_DIR'],
+                         starttime=kwargs['starttime'],
+                         endtime=kwargs['endtime'],
+                         network=kwargs['network'], station=kwargs['station'],
+                         level="channel", username=kwargs['username'],
+                         password=kwargs['password'],add_to_db=True)
             get_data(os.path.join(app.config['BASE_DIR'],
                      'Data/RFTN_Stations.xml'), os.path.join(
                      app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
@@ -266,6 +279,11 @@ def _async_get_data(app, **kwargs):
                      username=kwargs['username'],
                      password=kwargs['password'], add_to_db=True)
         else:
+            get_stations(data_path=app.config['BASE_DIR'],
+                         starttime=kwargs['starttime'], 
+                         endtime=kwargs['endtime'],
+                         network=kwargs['network'], station=kwargs['station'],
+                         level="channel", add_to_db=True)
             get_data(os.path.join(app.config['BASE_DIR'],
                      'Data/RFTN_Stations.xml'), os.path.join(
                      app.config['BASE_DIR'], 'Data/RFTN_Catalog.xml'),
